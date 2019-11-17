@@ -1,10 +1,11 @@
 #include <cassert>
 #include "bin-tree.hpp"
 #include "operators.hpp"
+#include "unary_functions.hpp"
 
-const double EPSILON = 0.00001;
-const char* INPUT_FILE = "diff.txt";
-
+static const double EPSILON    = 0.00001;
+static const char*  INPUT_FILE = "diff.txt";
+static const int    BUFSIZE    = 10;
 
 namespace CTE
 {
@@ -53,22 +54,39 @@ public:
         fprintf (stream, "}");
     }*/
 
-    CTE::ERR read_undertree (FILE* stream, Node_t *node)
-    {   
+    CTE::ERR read_undertree (FILE* stream, Node_t *node, char* treeInput)
+    {  
         if ( fscanf (stream, " %lf ", &(node -> data.value) ) )
         {
             fscanf (stream, " %c ", &symb);
             if ( symb != ')' )
                 return CTE::NOT_READ; 
             return CTE::OK;
-        }
+        } 
+
+        if (fscanf (stream, " %[A-Za-z] ", treeInput) )
+            if ( is_un_function (treeInput) )
+            {
+                node -> data.un_func = get_un_function_code (treeInput);
+                make_right (node, {});
+
+                fscanf (stream, " %c ", &symb);
+                if ( symb != '(' )
+                    return CTE::NOT_READ;
+                if ( read_undertree (stream, node -> right, treeInput) == CTE::NOT_READ )
+                    return CTE::NOT_READ;  
+                fscanf (stream, " %c ", &symb);
+                if ( symb != ')' )
+                    return CTE::NOT_READ; 
+                return CTE::OK;
+            } 
 
         fscanf (stream, " %c ", &symb);
         if ( symb == '(' )
         {
             make_left (node, {}); 
-            if ( read_undertree (stream, node -> left) == CTE::NOT_READ )
-            return CTE::NOT_READ;
+            if ( read_undertree (stream, node -> left, treeInput) == CTE::NOT_READ )
+                return CTE::NOT_READ;
         }
         
         fscanf (stream, " %c ", &symb);
@@ -86,7 +104,7 @@ public:
         if ( symb == '(' )
         {
              make_right (node, {}); 
-             if ( read_undertree (stream, node -> right) == CTE::NOT_READ )
+             if ( read_undertree (stream, node -> right, treeInput) == CTE::NOT_READ )
                 return CTE::NOT_READ;
         }
         
@@ -102,36 +120,58 @@ public:
     void write_ex_part (FILE* stream, Node_t *node)
     {        
         assert (node);
-        if (! node -> data.op )
+        if (! node -> left && ! node -> right )
         {
             fprintf (stream, "%lg", node -> data.value );
             return;
         }
+
         bool low_priority = false;
-        if ( node != head )
-            if ( node -> data.priority  <  node -> father -> data.priority)
-            {
-                low_priority = true;
-                fprintf (stream, "( ");
-            }
 
-        write_ex_part (stream, node -> left );
-        fprintf (stream, " %c ", node -> data.op);
-        write_ex_part (stream, node -> right);
+        if ( node -> data.op )
+        {
+            if ( node != head )
+                if ( node -> data.priority  <  node -> father -> data.priority)
+                {
+                    low_priority = true;
+                    fprintf (stream, "( ");
+                }
 
-        if (low_priority)
+            write_ex_part (stream, node -> left );
+            fprintf (stream, " %c ", node -> data.op);
+            write_ex_part (stream, node -> right);
+
+            if (low_priority)
+                fprintf (stream, " )");
+        }
+
+        if ( node -> data.un_func )
+        {
+            fprintf (stream, "%s ( ", get_un_func_by_code ( node -> data.un_func ) );
+            write_ex_part (stream, node -> right);
             fprintf (stream, " )");
+        }
     }
 
     double calculate ( Node_t *node )
     {
-        if ( ! node -> data.op )
+        if ( ! node -> left && ! node -> right )
             return node -> data.value;
-
-        double a = calculate (node -> left);
-        double b = calculate (node -> right);
+        double a = 0;
+        double b = 0;
+        if (node -> left)
+            a = calculate (node -> left);
+        if (node -> right)
+            b = calculate (node -> right);
         double result = 0;
-        use_operator ( a, b, node -> data.op, result );
+
+        if (node -> data.op)
+            use_operator ( a, b, node -> data.op, result );
+
+        if (node -> data.un_func)
+        {
+            result = use_un_func (node -> data.un_func, b);
+        }
         return result;
     }
 
@@ -148,7 +188,9 @@ public:
         if ( begin != '(' )
             return CTE::NOT_READ;
 
-        CTE::ERR res = read_undertree (stream, head);
+        char treeInput[BUFSIZE] = {};
+
+        CTE::ERR res = read_undertree (stream, head, treeInput);
         if (res != CTE::OK)
         {
             free_tree (head);
@@ -157,7 +199,7 @@ public:
         return res;
     }
 
-    void write_example (FILE* stream)
+    void write_example (FILE* stream) 
     {
         write_ex_part (stream, head);
     }
@@ -185,6 +227,7 @@ int main ()
     }
     
     differ.draw ((char*)"open");
+
     double result = differ.calculate (differ.head);
     printf ("%lg\n", result);
     differ.write_example (stdout);

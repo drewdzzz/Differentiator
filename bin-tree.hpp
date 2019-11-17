@@ -6,13 +6,15 @@
 #include <stdlib.h>
 #include <cstring>
 #include "operators.hpp"
-
+#include "unary_functions.hpp"
 #define $p getchar()
 
 struct informative_value
 {
     double value;
     char op;
+    char bin_func;
+    char un_func;
     char priority;
 };
 
@@ -257,9 +259,18 @@ protected:
     void write_data (FILE* stream, informative_value &data)
     {
         if ( data.op ) 
+        {
             fprintf (stream, "%c", data.op );
-        else 
+        }
+        else if (data.un_func)
+        {   
+            char* un_func = (char*)get_un_func_by_code (data.un_func);
+            fprintf (stream, "%s", un_func);
+        }
+        else
+        {
             fprintf (stream, "%lg", data.value);
+        }
     }
 };
 #endif
