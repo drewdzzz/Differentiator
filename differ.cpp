@@ -141,17 +141,27 @@ public:
             fprintf (stream, " )");
     }*/
 
-   /* double calculate ( Node_t *node )        NOT READY!!
+    double calculate ( Node_t *node )
     {
-        if ( ! node -> data.op )
+        if ( ! node -> left && ! node -> right )
             return node -> data.value;
-
-        double a = calculate (node -> left);
-        double b = calculate (node -> right);
+        double a = 0;
+        double b = 0;
+        if (node -> left)
+            a = calculate (node -> left);
+        if (node -> right)
+            b = calculate (node -> right);
         double result = 0;
-        use_operator ( a, b, node -> data.op, result );
+
+        if (node -> data.op)
+            use_operator ( a, b, node -> data.op, result );
+
+        if (node -> data.un_func)
+        {
+            result = use_un_func (node -> data.un_func, b);
+        }
         return result;
-    }*/
+    }
 
 public:
 
@@ -206,8 +216,8 @@ int main ()
     
     differ.draw ((char*)"open");
 
-    //double result = differ.calculate (differ.head);
-    //printf ("%lg\n", result);
+    double result = differ.calculate (differ.head);
+    printf ("%lg\n", result);
     //differ.write_example (stdout);
     //printf ("\n");
     return 0;

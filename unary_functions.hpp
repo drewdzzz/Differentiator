@@ -10,6 +10,14 @@ static char* un_functions[] = {"THAT'S AN EMPTY SPACE!!!!",
                                   "cos",
                                   "ln"};
 
+bool is_this_un_func (char code, char* func)
+{   
+    if ( ! strcmp ( un_functions [code], func ) )
+        return true;
+    else
+        return false;  
+}
+
 bool is_un_function (char* potential_func)
 {
     for (char i = 0; i < sizeof (un_functions); i++)
@@ -39,7 +47,18 @@ const char* get_un_func_by_code (char code)
     return un_functions[code];
 }
 
-double use_un_function (char* func)
-{}
+double use_un_func (char func_code, double value)
+{
+
+    if (is_this_un_func (func_code, "sin") )
+        return sin (value);
+    if (is_this_un_func (func_code, "cos") )
+        return cos (value);
+    if (is_this_un_func (func_code, "ln") )
+        return log (value);
+
+    assert (false);
+    return 0;
+}
 
 #endif
