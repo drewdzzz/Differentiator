@@ -5,12 +5,6 @@
 const double EPSILON = 0.00001;
 const char* INPUT_FILE = "diff.txt";
 
-//Если op >= 128, то это оператор
-/*struct informative_value
-{
-    double value;
-    unsigned int op;
-};*/
 
 namespace CTE
 {
@@ -31,7 +25,7 @@ public:
         fprintf (stream, "\"tree_node%p\" [label = \"", node);
         write_data (stream, node -> data);
         if (dump)
-            fprintf (stream," \n Address: %p\n Left: %p \n Right: %p", node, node -> left, node -> right);
+            fprintf (stream," \n Address: %p\n Left: %p \n Right: %p \n Father: %p", node, node -> left, node -> right, node -> father);
         fprintf (stream,"\"]\n");
 
         if (node -> left)
@@ -63,8 +57,9 @@ public:
     {   
         if ( fscanf (stream, " %lf ", &(node -> data.value) ) )
         {
-            fscanf (stream, " ");
-            fscanf (stream, ")");
+            fscanf (stream, " %c ", &symb);
+            if ( symb != ')' )
+                return CTE::NOT_READ;
             return CTE::OK;
         }
 
@@ -78,8 +73,10 @@ public:
         
         fscanf (stream, " %c ", &symb);
         if ( is_operator (symb) )
-            node -> data.op = get_operator_number (symb);
-
+        {
+            node -> data.op = symb;
+            node -> data.priority = get_op_priority (symb);
+        }
         fscanf (stream, " %c ", &symb);
         if ( symb == '(' )
         {
@@ -95,14 +92,37 @@ public:
             return CTE::NOT_READ;           
     }
 
+    void write_ex_part (Node_t *node)
+    {        
+        assert (node);
+        if (! node -> data.op )
+        {
+            printf ("%lg", node -> data.value );
+            return;
+        }
+        bool low_priority = false;
+        if ( node != head )
+            if ( node -> data.priority  <  node -> father -> data.priority)
+            {
+                low_priority = true;
+                printf ("( ");
+            }
+
+        write_ex_part (node -> left );
+        printf (" %c ", node -> data.op);
+        write_ex_part (node -> right);
+
+        if (low_priority)
+            printf (" )");
+    }
+
     double calculate ( Node_t *node )
     {
-        if ( ( node -> data.op ) < 256 )
+        if ( ! node -> data.op )
             return node -> data.value;
+
         double a = calculate (node -> left);
-
         double b = calculate (node -> right);
-
         double result = 0;
         use_operator ( a, b, node -> data.op, result );
         return result;
@@ -131,6 +151,11 @@ public:
         return res;
     }
 
+    void write_example ()
+    {
+        write_ex_part (head);
+    }
+
     /*void write_tree (const char* output_file)
     {
         FILE* stream = fopen (output_file, "w");
@@ -148,8 +173,10 @@ int main ()
     CalcTree differ;
     if ( differ.read_tree (INPUT_FILE) == CTE::OK )
         printf ("That's nice!\n");
-    differ.draw ("open");
+    differ.draw ((char*)"open");
     double result = differ.calculate (differ.head);
-    printf ("%lf\n", result);
+    printf ("%lg\n", result);
+    differ.write_example ();
+    printf ("\n");
     return 0;
 }

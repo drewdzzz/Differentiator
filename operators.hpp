@@ -1,6 +1,8 @@
 #ifndef CALC_TREE_OPERATORS_INCLUDED
 #define CALC_TREE_OPERATORS_INCLUDED
 
+#include <math.h>
+
 namespace OPE //Operator errors
 {
     enum ERR
@@ -10,40 +12,35 @@ namespace OPE //Operator errors
     } LAST_ERR;
 };
 
-static char operators[] = {'-', '+', '/', '*'};
+static char operators[] = {'-', 1, '+', 1, '/', 3, '*', 2, '^', 4};
 
-bool is_operator (unsigned int symb)
+bool is_operator (char symb)
 {
-    for (int i = 0; i < sizeof (operators); i++)
+    for (int i = 0; i < sizeof (operators); i+= 2)
         if (symb == operators[i])
             return true;
         
     return false; 
 }
 
-unsigned int get_operator_number (unsigned int symb)
+char get_op_priority (char symb)
 {
-    for (int i = 0; i < sizeof (operators); i++)
-        if (symb == operators[i])
-            return i + 256;
-
-}
-
-unsigned int get_operator (unsigned int code)
-{
-    if (code < 256) return 0;
-    return operators [code - 256];
+    for (int i = 0; i < sizeof (operators); i+= 2)
+        if (symb == operators[i]) 
+            return operators [i+1];
+    
+    return 0;
 }
 
 OPE::ERR use_operator (double a, double b, unsigned int op, double &res)
 {
-   op = get_operator (op);
    switch (op)
    {
        case '+': res = a + b; return OPE::OK;
        case '-': res = a - b; return OPE::OK;
        case '/': res = a / b; return OPE::OK;
        case '*': res = a * b; return OPE::OK;
+       case '^': res = pow (a, b); return OPE::OK;
        default : return OPE::NOT_EXIST;
    } 
 

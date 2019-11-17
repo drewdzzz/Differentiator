@@ -12,7 +12,8 @@
 struct informative_value
 {
     double value;
-    unsigned int op;
+    char op;
+    char priority;
 };
 
 ///@brief Enum with error codes for using my binary tree
@@ -39,10 +40,12 @@ public:
         T data;
         Node_t *right;
         Node_t *left;
+        Node_t *father;
 
         Node_t ():
             right (nullptr),
             left (nullptr),
+            father (nullptr),
             data ({})
         {};
     } *head;
@@ -78,6 +81,7 @@ public:
 
         node -> right = new Node_t;
         node -> right -> data = data;
+        node -> right -> father = node;
         node_counter++;
         return OK;
     }
@@ -91,6 +95,7 @@ public:
 
         node -> left = new Node_t;
         node -> left -> data = data;
+        node -> left -> father = node;
         node_counter++;
         return OK;
     }
@@ -112,7 +117,7 @@ public:
         fprintf (stream, "\"tree_node%p\" [label = \"", node);
         write_data (stream, node -> data);
         if (dump)
-            fprintf (stream," \n Address: %p\n Left: %p \n Right: %p", node, node -> left, node -> right);
+            fprintf (stream," \n Addres: %p\n Left: %p \n Right: %p\n Father: %p", node, node -> left, node -> right, node -> father);
         fprintf (stream,"\"]\n");
 
         if (node -> left)
@@ -251,10 +256,10 @@ protected:
 
     void write_data (FILE* stream, informative_value &data)
     {
-        if ( data.op >= 256 ) 
-            fprintf (stream, "%c", get_operator (data.op) );
+        if ( data.op ) 
+            fprintf (stream, "%c", data.op );
         else 
-            fprintf (stream, "%lf", data.value);
+            fprintf (stream, "%lg", data.value);
     }
 };
 #endif
