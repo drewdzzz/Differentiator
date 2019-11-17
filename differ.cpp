@@ -19,6 +19,7 @@ namespace CTE
 class CalcTree: public Tree_t <informative_value>
 {
     char symb = 0;
+    bool has_variable = false;
 public:
 
     virtual void define_for_draw (FILE* stream, Node_t *node, bool dump)
@@ -64,22 +65,35 @@ public:
             return CTE::OK;
         } 
 
-        if (fscanf (stream, " %[A-Za-z] ", treeInput) )
-            if ( is_un_function (treeInput) )
+        if ( fscanf (stream, " %[A-Za-z] ", treeInput) )
+            if ( strlen (treeInput) != 1 )
             {
-                node -> data.un_func = get_un_function_code (treeInput);
-                make_right (node, {});
+                if ( is_un_function (treeInput) )
+                {
+                    node -> data.un_func = get_un_function_code (treeInput);
+                    make_right (node, {});
 
-                fscanf (stream, " %c ", &symb);
-                if ( symb != '(' )
-                    return CTE::NOT_READ;
-                if ( read_undertree (stream, node -> right, treeInput) == CTE::NOT_READ )
-                    return CTE::NOT_READ;  
+                    fscanf (stream, " %c ", &symb);
+                    if ( symb != '(' )
+                        return CTE::NOT_READ;
+                    if ( read_undertree (stream, node -> right, treeInput) == CTE::NOT_READ )
+                        return CTE::NOT_READ;  
+                    fscanf (stream, " %c ", &symb);
+                    if ( symb != ')' )
+                        return CTE::NOT_READ; 
+                    return CTE::OK;
+                } 
+            }
+            else
+            {
+                node -> data.variable = treeInput [0];
+                has_variable = true;
                 fscanf (stream, " %c ", &symb);
                 if ( symb != ')' )
                     return CTE::NOT_READ; 
                 return CTE::OK;
-            } 
+            }
+            
 
         fscanf (stream, " %c ", &symb);
         if ( symb == '(' )
@@ -117,7 +131,7 @@ public:
         }  
     }
 
-    void write_ex_part (FILE* stream, Node_t *node)
+    /*void write_ex_part (FILE* stream, Node_t *node)
     {        
         assert (node);
         if (! node -> left && ! node -> right )
@@ -151,9 +165,9 @@ public:
             write_ex_part (stream, node -> right);
             fprintf (stream, " )");
         }
-    }
+    }*/
 
-    double calculate ( Node_t *node )
+   /* double calculate ( Node_t *node )                      //Проверка на переменную!!
     {
         if ( ! node -> left && ! node -> right )
             return node -> data.value;
@@ -173,7 +187,7 @@ public:
             result = use_un_func (node -> data.un_func, b);
         }
         return result;
-    }
+    }*/
 
 public:
 
@@ -199,10 +213,10 @@ public:
         return res;
     }
 
-    void write_example (FILE* stream) 
+   /* void write_example (FILE* stream) 
     {
         write_ex_part (stream, head);
-    }
+    }*/
 
     /*void write_tree (const char* output_file)
     {
@@ -228,9 +242,9 @@ int main ()
     
     differ.draw ((char*)"open");
 
-    double result = differ.calculate (differ.head);
-    printf ("%lg\n", result);
-    differ.write_example (stdout);
-    printf ("\n");
+   // double result = differ.calculate (differ.head);
+    //printf ("%lg\n", result);
+    //differ.write_example (stdout);
+    //printf ("\n");
     return 0;
 }

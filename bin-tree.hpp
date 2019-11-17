@@ -13,7 +13,7 @@ struct informative_value
 {
     double value;
     char op;
-    char bin_func;
+    char variable;
     char un_func;
     char priority;
 };
@@ -266,6 +266,10 @@ protected:
         {   
             char* un_func = (char*)get_un_func_by_code (data.un_func);
             fprintf (stream, "%s", un_func);
+        }
+        else if (data.variable)
+        {
+            fprintf (stream, "%c", data.variable);
         }
         else
         {
