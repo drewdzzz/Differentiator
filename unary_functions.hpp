@@ -5,12 +5,12 @@
 #include <string.h>
 #include <cassert>
 
-static char* un_functions[] = {"THAT'S AN EMPTY SPACE!!!!",
+static const char* un_functions[] = {"THAT'S AN EMPTY SPACE!!!!",
                                   "sin",
                                   "cos",
                                   "ln"};
 
-bool is_this_un_func (char code, char* func)
+bool is_this_un_func (char code, const char* func)
 {   
     if ( ! strcmp ( un_functions [code], func ) )
         return true;
@@ -44,7 +44,8 @@ char get_un_function_code (char* func)
 char* get_un_func_by_code (char code)
 {
     assert ( code < sizeof (un_functions) );
-    return un_functions[code];
+    char* res = strdup (un_functions[code]);
+    return res;
 }
 
 double use_un_func (char func_code, double value)
