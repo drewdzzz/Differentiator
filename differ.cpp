@@ -131,11 +131,16 @@ public:
         }  
     }
 
-    /*void write_ex_part (FILE* stream, Node_t *node)
+    void write_ex_part (FILE* stream, Node_t *node)
     {        
         assert (node);
         if (! node -> left && ! node -> right )
         {
+            if (node -> data.variable)
+            {    
+                fprintf (stream, "%c", node -> data.variable);
+                return;
+            }
             fprintf (stream, "%lg", node -> data.value );
             return;
         }
@@ -165,9 +170,9 @@ public:
             write_ex_part (stream, node -> right);
             fprintf (stream, " )");
         }
-    }*/
+    }
 
-   /* double calculate ( Node_t *node )                      //Проверка на переменную!!
+    /*double calculate ( Node_t *node )                      //Проверка на переменную!!
     {
         if ( ! node -> left && ! node -> right )
             return node -> data.value;
@@ -213,10 +218,10 @@ public:
         return res;
     }
 
-   /* void write_example (FILE* stream) 
+    void write_example (FILE* stream) 
     {
         write_ex_part (stream, head);
-    }*/
+    }
 
     /*void write_tree (const char* output_file)
     {
@@ -244,7 +249,7 @@ int main ()
 
    // double result = differ.calculate (differ.head);
     //printf ("%lg\n", result);
-    //differ.write_example (stdout);
-    //printf ("\n");
+    differ.write_example (stdout);
+    printf ("\n");
     return 0;
 }
