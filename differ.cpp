@@ -59,7 +59,7 @@ public:
         {
             fscanf (stream, " %c ", &symb);
             if ( symb != ')' )
-                return CTE::NOT_READ;
+                return CTE::NOT_READ; 
             return CTE::OK;
         }
 
@@ -77,6 +77,11 @@ public:
             node -> data.op = symb;
             node -> data.priority = get_op_priority (symb);
         }
+        else
+        {
+            return CTE::NOT_READ;
+        }
+        
         fscanf (stream, " %c ", &symb);
         if ( symb == '(' )
         {
@@ -89,7 +94,9 @@ public:
         if ( symb == ')' ) 
             return CTE::OK;
         else
-            return CTE::NOT_READ;           
+        {
+            return CTE::NOT_READ; 
+        }  
     }
 
     void write_ex_part (Node_t *node)
@@ -143,10 +150,6 @@ public:
 
         CTE::ERR res = read_undertree (stream, head);
 
-        fscanf (stream, " %c ", &begin);
-        if ( begin != ')' )
-            return CTE::NOT_READ;
-
         fclose (stream);
         return res;
     }
@@ -173,6 +176,11 @@ int main ()
     CalcTree differ;
     if ( differ.read_tree (INPUT_FILE) == CTE::OK )
         printf ("That's nice!\n");
+    else
+    {
+        abort ();
+    }
+    
     differ.draw ((char*)"open");
     double result = differ.calculate (differ.head);
     printf ("%lg\n", result);
