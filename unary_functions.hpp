@@ -41,7 +41,7 @@ char get_un_function_code (char* func)
     return 0;
 }
 
-const char* get_un_func_by_code (char code)
+char* get_un_func_by_code (char code)
 {
     assert ( code < sizeof (un_functions) );
     return un_functions[code];

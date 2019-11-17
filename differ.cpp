@@ -117,29 +117,41 @@ public:
         }  
     }
 
-    /*void write_ex_part (FILE* stream, Node_t *node)
+    void write_ex_part (FILE* stream, Node_t *node)
     {        
         assert (node);
-        if (! node -> data.op )
+        if (! node -> left && ! node -> right )
         {
             fprintf (stream, "%lg", node -> data.value );
             return;
         }
+
         bool low_priority = false;
-        if ( node != head )
-            if ( node -> data.priority  <  node -> father -> data.priority)
-            {
-                low_priority = true;
-                fprintf (stream, "( ");
-            }
 
-        write_ex_part (stream, node -> left );
-        fprintf (stream, " %c ", node -> data.op);
-        write_ex_part (stream, node -> right);
+        if ( node -> data.op )
+        {
+            if ( node != head )
+                if ( node -> data.priority  <  node -> father -> data.priority)
+                {
+                    low_priority = true;
+                    fprintf (stream, "( ");
+                }
 
-        if (low_priority)
+            write_ex_part (stream, node -> left );
+            fprintf (stream, " %c ", node -> data.op);
+            write_ex_part (stream, node -> right);
+
+            if (low_priority)
+                fprintf (stream, " )");
+        }
+
+        if ( node -> data.un_func )
+        {
+            fprintf (stream, "%s ( ", get_un_func_by_code ( node -> data.un_func ) );
+            write_ex_part (stream, node -> right);
             fprintf (stream, " )");
-    }*/
+        }
+    }
 
     double calculate ( Node_t *node )
     {
@@ -187,10 +199,10 @@ public:
         return res;
     }
 
-    /*void write_example (FILE* stream)    NOT READY!!!
+    void write_example (FILE* stream) 
     {
         write_ex_part (stream, head);
-    }*/
+    }
 
     /*void write_tree (const char* output_file)
     {
@@ -218,7 +230,7 @@ int main ()
 
     double result = differ.calculate (differ.head);
     printf ("%lg\n", result);
-    //differ.write_example (stdout);
-    //printf ("\n");
+    differ.write_example (stdout);
+    printf ("\n");
     return 0;
 }
