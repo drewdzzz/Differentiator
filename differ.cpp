@@ -99,12 +99,12 @@ public:
         }  
     }
 
-    void write_ex_part (Node_t *node)
+    void write_ex_part (FILE* stream, Node_t *node)
     {        
         assert (node);
         if (! node -> data.op )
         {
-            printf ("%lg", node -> data.value );
+            fprintf (stream, "%lg", node -> data.value );
             return;
         }
         bool low_priority = false;
@@ -112,15 +112,15 @@ public:
             if ( node -> data.priority  <  node -> father -> data.priority)
             {
                 low_priority = true;
-                printf ("( ");
+                fprintf (stream, "( ");
             }
 
-        write_ex_part (node -> left );
-        printf (" %c ", node -> data.op);
-        write_ex_part (node -> right);
+        write_ex_part (stream, node -> left );
+        fprintf (stream, " %c ", node -> data.op);
+        write_ex_part (stream, node -> right);
 
         if (low_priority)
-            printf (" )");
+            fprintf (stream, " )");
     }
 
     double calculate ( Node_t *node )
@@ -149,14 +149,17 @@ public:
             return CTE::NOT_READ;
 
         CTE::ERR res = read_undertree (stream, head);
-
+        if (res != CTE::OK)
+        {
+            free_tree (head);
+        }
         fclose (stream);
         return res;
     }
 
-    void write_example ()
+    void write_example (FILE* stream)
     {
-        write_ex_part (head);
+        write_ex_part (stream, head);
     }
 
     /*void write_tree (const char* output_file)
@@ -184,7 +187,7 @@ int main ()
     differ.draw ((char*)"open");
     double result = differ.calculate (differ.head);
     printf ("%lg\n", result);
-    differ.write_example ();
+    differ.write_example (stdout);
     printf ("\n");
     return 0;
 }
