@@ -38,6 +38,11 @@ struct diff_funcs
                 new_node -> right = differentiate ( node -> right );
                 return new_node;
                 break;
+            case '-':
+                new_node -> data.op = '-';
+                new_node -> left  = differentiate ( node -> left  );
+                new_node -> right = differentiate ( node -> right );
+                return new_node;
             default: abort (); break;
         }
     }
