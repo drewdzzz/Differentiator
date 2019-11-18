@@ -19,7 +19,6 @@ struct informative_value
 
     informative_value & operator = (const informative_value &other)
     {
-        printf ("Copying an informative value\n");
         this -> value    = other.value;
         this -> op       = other.op;
         this -> variable = other.variable;
@@ -55,16 +54,31 @@ public:
         Node_t *left;
         Node_t *father;
 
-        Node_t ():
+        Node_t ():                                  //Конструктор
             right (nullptr),
             left (nullptr),
             father (nullptr),
             data ({})
         {};
 
-        Node_t & operator = (const Node_t &other)
+        Node_t (const Node_t &other):
+             data ({})                             //Конструктор копирования
         {
-            printf ("COPY A NODE\n");
+            this -> data = other.data;
+            if (other.left)
+            {
+                this -> left = new Node_t;
+                *(this -> left) = *(other.left);
+            }
+            if (other.right)
+            {
+                this -> right = new Node_t;
+                *(this -> right) = *(other.right);
+            }   
+        }
+
+        Node_t & operator = (const Node_t &other)  //Оператор копирования
+        {
             this -> data = other.data;
             if (this -> left)
                 delete this -> left;
@@ -80,7 +94,6 @@ public:
                 this -> right = new Node_t;
                 *(this -> right) = *(other.right);
             }
-
             return *this;
         }
 
