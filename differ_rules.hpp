@@ -43,9 +43,27 @@ struct diff_funcs
                 new_node -> left  = differentiate ( node -> left  );
                 new_node -> right = differentiate ( node -> right );
                 return new_node;
+            case '*':
+                new_node -> data.op = '+';
+                new_node -> left = new CalcTree::Node_t;
+                    new_node -> left -> data.op = '*';
+                new_node -> right = new CalcTree::Node_t;
+                    new_node -> right -> data.op = '*';
+
+                new_node -> left -> left = new CalcTree::Node_t;
+                new_node -> left -> left = differentiate (node -> left);
+                new_node -> left -> right = new CalcTree::Node_t ( *(node -> right) );
+
+                new_node -> right -> right = new CalcTree::Node_t;
+                new_node -> right -> right = differentiate (node -> right);
+                new_node -> right -> left = new CalcTree::Node_t ( *(node -> left) );
+                return new_node;
+                break;
             default: abort (); break;
         }
     }
+
+
 };
 
 #endif

@@ -58,7 +58,7 @@ public:
             father (nullptr),
             data ({})
         {};
-
+        
         Node_t (const Node_t &other):
              data ({})                             //Конструктор копирования
         {
