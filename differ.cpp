@@ -1,5 +1,7 @@
 #include "differ-tree.hpp"
 
+const char*  INPUT_FILE = "diff.txt";
+
 int main ()
 {
     /*CalcTree differ;
@@ -36,10 +38,9 @@ int main ()
     differed_twice.draw("open");*/
 
     CalcTree tree1;
-    tree1.read_tree (INPUT_FILE);
-    CalcTree::Node_t *node = new CalcTree::Node_t (*(tree1.head -> left));
     CalcTree tree2;
-    tree2.head = node;
+    tree1.read_tree (INPUT_FILE);
+    tree2.head = tree1.head;
     tree1.draw ("open");
     $p;
     tree2.draw ("open");

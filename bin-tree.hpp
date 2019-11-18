@@ -43,8 +43,6 @@ enum ERR_CODE
 template <typename T>
 class Tree_t
 {
-protected:
-    long node_counter;
 public:
     ///@brief Node struct
     struct Node_t
@@ -100,8 +98,7 @@ public:
     } *head;
 
     ///@brief Constructor of Tree_t
-    Tree_t ():
-        node_counter (1)
+    Tree_t ()
     {
         head = new Node_t;
     }
@@ -131,7 +128,18 @@ public:
         node -> right = new Node_t;
         node -> right -> data = data;
         node -> right -> father = node;
-        node_counter++;
+        return OK;
+    }
+
+    ///@brief Function adds an existing right descedant
+    ///@return OK if descedant was created, NOT_EXIST if node doesn't exist, IS_NOT_FREE if descedant was created before
+    ERR_CODE add_right (Node_t *node, Node_t *new_son)
+    {
+        if (!node)         return NOT_EXIST;
+        if (node -> right) return IS_NOT_FREE;
+
+        node -> right = new_son;
+        new_son -> father = node;
         return OK;
     }
 
@@ -145,7 +153,18 @@ public:
         node -> left = new Node_t;
         node -> left -> data = data;
         node -> left -> father = node;
-        node_counter++;
+        return OK;
+    }
+
+    ///@brief Function adds an existing left descedant
+    ///@return OK if descedant was created, NOT_EXIST if node doesn't exist, IS_NOT_FREE if descedant was created before
+    ERR_CODE add_left (Node_t *node, Node_t *new_son)
+    {
+        if (!node)        return NOT_EXIST;
+        if (node -> left) return IS_NOT_FREE;
+
+        node -> left = new_son;
+        node -> left -> father = node;
         return OK;
     }
 
@@ -156,7 +175,6 @@ public:
         if (!node)                               return NOT_EXIST;
         if ((*node) -> right || (*node) -> left) return NOT_LEAF;
         free (*node);
-        node_counter--;
         *node = nullptr;
     }
 

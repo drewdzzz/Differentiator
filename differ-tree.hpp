@@ -7,7 +7,6 @@
 #include "unary_functions.hpp"
 
 static const double EPSILON    = 0.0001;
-static const char*  INPUT_FILE = "diff.txt";
 static const int    BUFSIZE    = 10;
 
 bool equal (double a, double b)
