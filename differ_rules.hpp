@@ -15,6 +15,12 @@ namespace diff_funcs
             new_node -> data.value = 1;
             return new_node;
         }
+        if ( CalcTree::is_leaf (node) && ! node -> data.variable )
+        {
+            CalcTree::Node_t *new_node = new CalcTree::Node_t;
+            new_node -> data.value = 0;
+            return new_node;   
+        }
     }
 };
 

@@ -239,27 +239,27 @@ public:
         node -> right = nullptr;
     }
 
-    bool is_leaf (Node_t *node)
+    static bool is_leaf (Node_t *node)
     {
         return (! node -> left) && (! node -> right);
     }
 
-    bool right_operand_is_zero (Node_t *node)
+    static bool right_operand_is_zero (Node_t *node)
     {
         return ( is_leaf (node -> right) &&  ( ( ! node -> right -> data.variable ) && equal (node -> right -> data.value, 0) ) );
     }
 
-    bool left_operand_is_zero (Node_t *node)
+    static bool left_operand_is_zero (Node_t *node)
     {
         return ( is_leaf (node -> left) &&  ( ( ! node -> left -> data.variable ) && equal (node -> left -> data.value, 0) ) );
     }
 
-    bool right_operand_is_one (Node_t *node)
+    static bool right_operand_is_one (Node_t *node)
     {
         return ( is_leaf (node -> right) &&  ( ( ! node -> right -> data.variable ) && equal (node -> right -> data.value, 1) ) );
     }
 
-    bool left_operand_is_one (Node_t *node)
+    static bool left_operand_is_one (Node_t *node)
     {
         return ( is_leaf (node -> left) &&  ( ( ! node -> left -> data.variable ) && equal (node -> left -> data.value, 1) ) );
     }

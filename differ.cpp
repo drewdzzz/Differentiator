@@ -29,5 +29,10 @@ int main ()
     differ.draw ("open");
     $p;
     differed.draw("open");
+    CalcTree differed_twice;
+    delete differed_twice.head;
+    differed_twice.head = diff_funcs::differentiate (differed.head);
+    $p;
+    differed_twice.draw("open");
     return 0;
 }
