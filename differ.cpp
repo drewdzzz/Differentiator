@@ -171,7 +171,7 @@ class CalcTree: public Tree_t <informative_value>
         }
     }
 
-    OPE::ERR calculate ( Node_t *node, double &result )                      //Проверка на переменную!!
+    OPE::ERR calculate ( Node_t *node, double &result )
     {
         if ( has_variable )
             return OPE::HAS_VARIABLE;
@@ -223,6 +223,19 @@ public:
         write_ex_part (stream, head);
     }
 
+    void kill_children (Node_t *node)
+    {
+        delete node -> left;
+        delete node -> right;
+        node -> left = nullptr;
+        node -> right = nullptr;
+    }
+
+    bool is_leaf (Node_t *node)
+    {
+        return (! node -> left) && (! node -> right);
+    }
+
     void simplify (Node_t *node)
     {
         if (! node -> left && ! node -> right)
@@ -236,14 +249,11 @@ public:
             simplify (node -> left);
             simplify (node -> right);
 
-            if ( (! node -> left -> left) && (! node -> left -> right) && (! node -> right -> left) && (! node -> right -> right) && ! node -> left -> data.variable && ! node -> right -> data.variable )
+            if ( is_leaf (node -> left) && is_leaf (node -> right) && ! node -> left -> data.variable && ! node -> right -> data.variable )
             {
                 use_operator ( node -> left -> data.value, node -> right -> data.value, node -> data.op, node -> data.value);
                 node -> data.op = 0;
-                delete node -> left;
-                delete node -> right;
-                node -> left = nullptr;
-                node -> right = nullptr;
+                kill_children (node);
                 return;
             }
             else
@@ -254,7 +264,20 @@ public:
         else if ( node -> data.un_func )
         {
             assert (node -> right);
-            
+
+            simplify (node -> right);
+
+            if ( is_leaf (node -> right) && ! node -> right -> data.variable )
+            {
+                node -> data.value = use_un_func ( node -> data.un_func, node -> right -> data.value);
+                node -> data.un_func = 0;
+                kill_children (node);
+                return;
+            }
+            else
+            {
+                return;
+            } 
         }
 
     }
@@ -284,8 +307,6 @@ int main ()
     
     differ.draw ((char*)"open");
 
-    //double result = differ.calculate (differ.head);
-    //rintf ("%lg\n", result);
     differ.write_example (stdout);
     $p;
     differ.simplify (differ.head);
