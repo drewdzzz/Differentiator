@@ -9,7 +9,8 @@ namespace OPE //Operator errors
     {
         OK,
         NOT_EXIST,
-        HAS_VARIABLE
+        HAS_VARIABLE,
+        DIVIDE_TO_ZERO
     } LAST_ERR;
 };
 

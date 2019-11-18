@@ -3,9 +3,14 @@
 #include "operators.hpp"
 #include "unary_functions.hpp"
 
-static const double EPSILON    = 0.00001;
+static const double EPSILON    = 0.0001;
 static const char*  INPUT_FILE = "diff.txt";
 static const int    BUFSIZE    = 10;
+
+bool equal (double a, double b)
+{
+    return fabs (a - b) < EPSILON;
+}
 
 namespace CTE
 {
@@ -171,6 +176,8 @@ class CalcTree: public Tree_t <informative_value>
         }
     }
 
+public:
+
     OPE::ERR calculate ( Node_t *node, double &result )
     {
         if ( has_variable )
@@ -180,9 +187,9 @@ class CalcTree: public Tree_t <informative_value>
         double a = 0;
         double b = 0;
         if (node -> left)
-            a = calculate (node -> left, result);
+            calculate (node -> left, a);
         if (node -> right)
-            b = calculate (node -> right, result);
+            calculate (node -> right, b);
 
         if (node -> data.op)
             use_operator ( a, b, node -> data.op, result );
@@ -193,8 +200,6 @@ class CalcTree: public Tree_t <informative_value>
         }
         return OPE::OK;
     }
-
-public:
 
 
     CTE::ERR read_tree (const char* input_file)
@@ -225,8 +230,8 @@ public:
 
     void kill_children (Node_t *node)
     {
-        delete node -> left;
-        delete node -> right;
+        free_tree (node -> left);
+        free_tree (node -> right);
         node -> left = nullptr;
         node -> right = nullptr;
     }
@@ -236,10 +241,85 @@ public:
         return (! node -> left) && (! node -> right);
     }
 
-    void simplify (Node_t *node)
+    bool right_operand_is_zero (Node_t *node)
+    {
+        return ( is_leaf (node -> right) &&  ( ( ! node -> right -> data.variable ) && equal (node -> right -> data.value, 0) ) );
+    }
+
+    bool left_operand_is_zero (Node_t *node)
+    {
+        return ( is_leaf (node -> left) &&  ( ( ! node -> left -> data.variable ) && equal (node -> left -> data.value, 0) ) );
+    }
+
+    bool right_operand_is_one (Node_t *node)
+    {
+        return ( is_leaf (node -> right) &&  ( ( ! node -> right -> data.variable ) && equal (node -> right -> data.value, 1) ) );
+    }
+
+    bool left_operand_is_one (Node_t *node)
+    {
+        return ( is_leaf (node -> left) &&  ( ( ! node -> left -> data.variable ) && equal (node -> left -> data.value, 1) ) );
+    }
+
+
+    OPE::ERR simplify_unusuals (Node_t *node)
+    {
+        if ( node -> data.op == '/' && is_leaf ( node -> right) && equal ( node -> right -> data.value, 0) )
+        {
+           return OPE::DIVIDE_TO_ZERO;
+        }
+        if ( node -> data.op == '/' && is_leaf ( node -> right) && equal ( node -> right -> data.value, 0) )
+        {
+            kill_children (node);
+            node -> data.value = 0;
+            node -> data.op = 0;
+            return OPE::OK;
+        }
+        if ( node -> data.op == '*' )
+        {
+            if (right_operand_is_zero (node) || left_operand_is_zero (node) )
+            {
+                kill_children (node);
+                node -> data.op    = 0;
+                node -> data.value = 0;
+                return OPE::OK;
+            }
+
+            if (left_operand_is_one (node) )
+            {
+                if (node -> father -> left == node)
+                {
+                    node -> father -> left = node -> right; //Подвешиваем то, что справа, к левой ветке
+                } 
+                else
+                {
+                    node -> father -> right = node -> right; //Подвешиваем то, что справа, к правой ветке
+                }
+                delete node; 
+                return OPE::OK;      
+            }
+            
+            if (right_operand_is_one (node) )
+            {
+                if (node -> father -> left == node)
+                {
+                    node -> father -> left = node -> left; //Подвешиваем то, что слева, к левой ветке
+                } 
+                else
+                {
+                    node -> father -> right = node -> left; //Подвешиваем то, что слева, к правой ветке
+                }
+                delete node; 
+                return OPE::OK;      
+            }
+            
+        }
+    }
+
+    OPE::ERR simplify (Node_t *node)
     {
         if (! node -> left && ! node -> right)
-            return;
+            return OPE::OK;
 
         if ( node -> data.op )
         {
@@ -254,11 +334,13 @@ public:
                 use_operator ( node -> left -> data.value, node -> right -> data.value, node -> data.op, node -> data.value);
                 node -> data.op = 0;
                 kill_children (node);
-                return;
+                return OPE::OK;
             }
-            else
-            {
-                return;
+            else 
+            {   
+                if ( simplify_unusuals (node) != OPE::OK )
+                    return OPE::DIVIDE_TO_ZERO;
+                return OPE::OK;
             }
         }
         else if ( node -> data.un_func )
@@ -272,11 +354,11 @@ public:
                 node -> data.value = use_un_func ( node -> data.un_func, node -> right -> data.value);
                 node -> data.un_func = 0;
                 kill_children (node);
-                return;
+                return OPE::OK;
             }
             else
             {
-                return;
+                return OPE::OK;
             } 
         }
 
@@ -306,6 +388,9 @@ int main ()
     }
     
     differ.draw ((char*)"open");
+    double result = 0;
+    differ.calculate (differ.head, result);
+    printf ("result: %lf\n", result);
 
     differ.write_example (stdout);
     $p;
