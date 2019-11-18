@@ -8,7 +8,8 @@ namespace OPE //Operator errors
     enum ERR
     {
         OK,
-        NOT_EXIST
+        NOT_EXIST,
+        HAS_VARIABLE
     } LAST_ERR;
 };
 

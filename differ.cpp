@@ -20,7 +20,6 @@ class CalcTree: public Tree_t <informative_value>
 {
     char symb = 0;
     bool has_variable = false;
-public:
 
     virtual void define_for_draw (FILE* stream, Node_t *node, bool dump)
     {
@@ -172,17 +171,18 @@ public:
         }
     }
 
-    /*double calculate ( Node_t *node )                      //Проверка на переменную!!
+    OPE::ERR calculate ( Node_t *node, double &result )                      //Проверка на переменную!!
     {
+        if ( has_variable )
+            return OPE::HAS_VARIABLE;
         if ( ! node -> left && ! node -> right )
-            return node -> data.value;
+            result = node -> data.value;
         double a = 0;
         double b = 0;
         if (node -> left)
-            a = calculate (node -> left);
+            a = calculate (node -> left, result);
         if (node -> right)
-            b = calculate (node -> right);
-        double result = 0;
+            b = calculate (node -> right, result);
 
         if (node -> data.op)
             use_operator ( a, b, node -> data.op, result );
@@ -191,8 +191,8 @@ public:
         {
             result = use_un_func (node -> data.un_func, b);
         }
-        return result;
-    }*/
+        return OPE::OK;
+    }
 
 public:
 
@@ -223,6 +223,43 @@ public:
         write_ex_part (stream, head);
     }
 
+    void simplify (Node_t *node)
+    {
+        if (! node -> left && ! node -> right)
+            return;
+
+        if ( node -> data.op )
+        {
+            assert (node -> left);
+            assert (node -> right);
+
+            simplify (node -> left);
+            simplify (node -> right);
+
+            if ( (! node -> left -> left) && (! node -> left -> right) && (! node -> right -> left) && (! node -> right -> right) && ! node -> left -> data.variable && ! node -> right -> data.variable )
+            {
+                use_operator ( node -> left -> data.value, node -> right -> data.value, node -> data.op, node -> data.value);
+                node -> data.op = 0;
+                delete node -> left;
+                delete node -> right;
+                node -> left = nullptr;
+                node -> right = nullptr;
+                return;
+            }
+            else
+            {
+                return;
+            }
+        }
+        else if ( node -> data.un_func )
+        {
+            assert (node -> right);
+            
+        }
+
+    }
+
+
     /*void write_tree (const char* output_file)
     {
         FILE* stream = fopen (output_file, "w");
@@ -247,8 +284,13 @@ int main ()
     
     differ.draw ((char*)"open");
 
-   // double result = differ.calculate (differ.head);
-    //printf ("%lg\n", result);
+    //double result = differ.calculate (differ.head);
+    //rintf ("%lg\n", result);
+    differ.write_example (stdout);
+    $p;
+    differ.simplify (differ.head);
+    differ.draw ((char*)"open");
+    printf ("\n");
     differ.write_example (stdout);
     printf ("\n");
     return 0;
