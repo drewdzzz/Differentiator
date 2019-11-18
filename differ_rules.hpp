@@ -5,21 +5,40 @@
 #include <math.h>
 #include "bin-tree.hpp"
 
-namespace diff_funcs 
+struct diff_funcs 
 {
-    CalcTree::Node_t* differentiate (CalcTree::Node_t *node)
+    static CalcTree::Node_t* differentiate (CalcTree::Node_t *node)
     {
+        CalcTree::Node_t *new_node = new CalcTree::Node_t;
         if (node -> data.variable)
         {
-            CalcTree::Node_t *new_node = new CalcTree::Node_t;
             new_node -> data.value = 1;
             return new_node;
         }
         if ( CalcTree::is_leaf (node) && ! node -> data.variable )
         {
-            CalcTree::Node_t *new_node = new CalcTree::Node_t;
             new_node -> data.value = 0;
             return new_node;   
+        }
+        if ( node -> data.op )
+        {
+            return operator_diff (node);
+        }
+
+    }
+
+    static CalcTree::Node_t* operator_diff (CalcTree::Node_t *node)
+    {
+        CalcTree::Node_t *new_node = new CalcTree::Node_t;
+        switch (node -> data.op)
+        {
+            case '+':
+                new_node -> data.op = '+';
+                new_node -> left  = differentiate ( node -> left  );
+                new_node -> right = differentiate ( node -> right );
+                return new_node;
+                break;
+            default: abort (); break;
         }
     }
 };
