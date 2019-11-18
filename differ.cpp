@@ -2,13 +2,13 @@
 
 int main ()
 {
-    CalcTree differ;
+    /*CalcTree differ;
     if ( differ.read_tree (INPUT_FILE) == CTE::OK )
         printf ("That's nice!\n");
     else
     {
         abort ();
-    }
+    }*/
     
     /*differ.draw ((char*)"open");
     double result = 0;
@@ -23,7 +23,7 @@ int main ()
     differ.write_example (stdout);
     printf ("\n");*/
 
-    CalcTree differed;
+    /*CalcTree differed;
     delete differed.head;
     differed.head = diff_funcs::differentiate (differ.head);
     differ.draw ("open");
@@ -33,6 +33,14 @@ int main ()
     delete differed_twice.head;
     differed_twice.head = diff_funcs::differentiate (differed.head);
     $p;
-    differed_twice.draw("open");
+    differed_twice.draw("open");*/
+
+    CalcTree tree1;
+    CalcTree tree2;
+    tree1.read_tree (INPUT_FILE);
+    tree2.head = tree1.head -> left;
+    tree1.draw ("open");
+    $p;
+    tree2.draw ("open");
     return 0;
 }

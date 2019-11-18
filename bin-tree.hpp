@@ -16,6 +16,17 @@ struct informative_value
     char variable;
     char un_func;
     char priority;
+
+    informative_value & operator = (const informative_value &other)
+    {
+        printf ("Copying an informative value\n");
+        this -> value    = other.value;
+        this -> op       = other.op;
+        this -> variable = other.variable;
+        this -> un_func  = other.un_func;
+        this -> priority = other.priority;
+        return *this;
+    }
 };
 
 ///@brief Enum with error codes for using my binary tree
@@ -50,6 +61,29 @@ public:
             father (nullptr),
             data ({})
         {};
+
+        Node_t & operator = (const Node_t &other)
+        {
+            printf ("COPY A NODE\n");
+            this -> data = other.data;
+            if (this -> left)
+                delete this -> left;
+            if (this -> right)
+                delete this -> right;
+            if (other.left)
+            {
+                this -> left = new Node_t;
+                *(this -> left) = *(other.left);
+            }
+            if (other.right)
+            {
+                this -> right = new Node_t;
+                *(this -> right) = *(other.right);
+            }
+
+            return *this;
+        }
+
     } *head;
 
     ///@brief Constructor of Tree_t
