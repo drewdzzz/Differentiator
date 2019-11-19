@@ -14,7 +14,7 @@ namespace OPE //Operator errors
     } LAST_ERR;
 };
 
-static char operators[] = {'-', 1, '+', 1,'*', 2, '/', 3, '^', 4};
+static char operators[] = {'-', 1, '+', 1, '*', 2, '/', 3, '^', 3};
 
 bool is_operator (char symb)
 {

@@ -15,7 +15,6 @@ struct informative_value
     char op;
     char variable;
     char un_func;
-    char priority;
 
     informative_value & operator = (const informative_value &other)
     {
@@ -23,7 +22,6 @@ struct informative_value
         this -> op       = other.op;
         this -> variable = other.variable;
         this -> un_func  = other.un_func;
-        this -> priority = other.priority;
         return *this;
     }
 };
@@ -67,12 +65,15 @@ public:
             {
                 this -> left = new Node_t;
                 *(this -> left) = *(other.left);
+                this -> left -> father = this;
             }
             if (other.right)
             {
                 this -> right = new Node_t;
                 *(this -> right) = *(other.right);
-            }   
+                this -> right -> father = this;
+            } 
+
         }
 
         Node_t & operator = (const Node_t &other)  //Оператор копирования (Создаёт НОВЫЕ НОДЫ рекурсивно, вроде как проверено)
@@ -86,11 +87,13 @@ public:
             {
                 this -> left = new Node_t;
                 *(this -> left) = *(other.left);
+                this -> left -> father = this;
             }
             if (other.right)
             {
                 this -> right = new Node_t;
                 *(this -> right) = *(other.right);
+                this -> right -> father = this;
             }
             return *this;
         }

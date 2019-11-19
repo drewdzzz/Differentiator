@@ -16,15 +16,14 @@ int main ()
     delete differed.head;
     DFE::ERR ERR_CODE = DFE::OK;
     differed.head = diff_funcs::differentiate (differ.head, ERR_CODE);
+    differ.dump ("open");
+    $p;
     if (ERR_CODE != DFE::OK)
-        printf ("OT OK\n");
-    differ.draw ("open");
-    $p;
-    differed.draw("open");
-    $p;
-    differed.simplify(differed.head);
-    differed.draw("open");
-    $p;
+        printf ("NOT OK\n");
+    //differed.simplify( differed.head );
+    differed.write_example (stdout);
+    printf ("\n");
+    differed.dump ("open");
 
     return 0;
 }

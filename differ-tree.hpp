@@ -33,7 +33,7 @@ class CalcTree: public Tree_t <informative_value>
         fprintf (stream, "\"tree_node%p\" [label = \"", node);
         write_data (stream, node -> data);
         if (dump)
-            fprintf (stream," \n Address: %p\n Left: %p \n Right: %p \n Father: %p", node, node -> left, node -> right, node -> father);
+            fprintf (stream," \n Address: %p\n Left: %p \n Right: %p \n Father: %p \n Operator: %d \n UN_FUNC: %d \n priority: %d", node, node -> left, node -> right, node -> father, node -> data.op, node -> data.un_func, get_op_priority ( node -> data.op ) );
         fprintf (stream,"\"]\n");
 
         if (node -> left)
@@ -45,21 +45,6 @@ class CalcTree: public Tree_t <informative_value>
             define_for_draw (stream, node -> right, dump);
         }
     }
-
-    /*void write_undertree (FILE* stream, Node_t *node)
-    {
-        assert (stream);
-        assert (node);
-
-        fprintf (stream, "{ '");
-        write_data(stream, node -> data);
-        fprintf (stream, "' ");
-        if (node -> left)
-            write_undertree (stream, node -> left);
-        if (node -> right)
-            write_undertree (stream, node -> right);
-        fprintf (stream, "}");
-    }*/
 
     CTE::ERR read_undertree (FILE* stream, Node_t *node, char* treeInput)
     {  
@@ -113,7 +98,6 @@ class CalcTree: public Tree_t <informative_value>
         if ( is_operator (symb) )
         {
             node -> data.op = symb;
-            node -> data.priority = get_op_priority (symb);
         }
         else
         {
@@ -140,6 +124,8 @@ class CalcTree: public Tree_t <informative_value>
     void write_ex_part (FILE* stream, Node_t *node)
     {        
         assert (node);
+        assert (stream);
+
         if (! node -> left && ! node -> right )
         {
             if (node -> data.variable)
@@ -155,12 +141,19 @@ class CalcTree: public Tree_t <informative_value>
 
         if ( node -> data.op )
         {
+            assert (node -> right);
+            assert (node -> left);
+
             if ( node != head )
-                if ( node -> data.priority  <  node -> father -> data.priority)
+            {
+                assert ( node -> father );
+
+                if ( get_op_priority (node -> data.op)  <  get_op_priority (node -> father -> data.op) )
                 {
                     low_priority = true;
                     fprintf (stream, "( ");
                 }
+            }
 
             write_ex_part (stream, node -> left );
             fprintf (stream, " %c ", node -> data.op);
@@ -172,6 +165,8 @@ class CalcTree: public Tree_t <informative_value>
 
         if ( node -> data.un_func )
         {
+            assert (node -> right);
+
             fprintf (stream, "%s ( ", get_un_func_by_code ( node -> data.un_func ) );
             write_ex_part (stream, node -> right);
             fprintf (stream, " )");
@@ -366,14 +361,6 @@ public:
 
     }
 
-
-    /*void write_tree (const char* output_file)
-    {
-        FILE* stream = fopen (output_file, "w");
-        assert (stream);
-        write_undertree (stream, head);
-        fclose (stream);
-    }*/
 
 };
 
