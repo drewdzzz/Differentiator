@@ -26,7 +26,10 @@ int main ()
     printf ("\n");
     differed.draw ("open");
 
-
-
+    differ.insert_variable ('x', 2);                      //НАПИШИ КОПИРОВАНИЕ ДЛЯ ДЕРЕВА CalcTree
+    differ.draw ("open");
+    differ.write_example (stdout);
+    differ.simplify( differ.head );
+    differ.write_example (stdout);
     return 0;
 }

@@ -173,7 +173,30 @@ class CalcTree: public Tree_t <informative_value>
         }
     }
 
+    void part_insert_var (Node_t *node, const char &variable, const double &var_value, long &counter)
+    {
+        assert (node);
+        if ( node -> data.variable == variable) 
+        {
+            node -> data.variable = 0;
+            node -> data.value = var_value;
+        }
+
+        if ( node -> left )
+            part_insert_var (node -> left, variable, var_value, counter);
+
+        if ( node -> right )
+            part_insert_var (node -> right, variable, var_value, counter);
+    }
+
 public:
+
+    long insert_variable (const char variable, const double var_value)
+    {   
+        long counter = 0;
+        part_insert_var (head, variable, var_value, counter);
+        return counter;
+    }
 
     OPE::ERR calculate ( Node_t *node, double &result )
     {
