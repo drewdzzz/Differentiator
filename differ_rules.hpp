@@ -50,16 +50,39 @@ struct diff_funcs
                 new_node -> right = new CalcTree::Node_t;
                     new_node -> right -> data.op = '*';
 
-                new_node -> left -> left = new CalcTree::Node_t;
                 new_node -> left -> left = differentiate (node -> left);
                 new_node -> left -> right = new CalcTree::Node_t ( *(node -> right) );
 
-                new_node -> right -> right = new CalcTree::Node_t;
                 new_node -> right -> right = differentiate (node -> right);
                 new_node -> right -> left = new CalcTree::Node_t ( *(node -> left) );
                 return new_node;
                 break;
-            default: abort (); break;
+            case '/':
+                new_node -> data.op = '/';
+                new_node -> right = new CalcTree::Node_t;
+                    new_node -> right -> data.op = '^';
+
+                new_node -> right -> right = new CalcTree::Node_t;
+                    new_node -> right -> right -> data.value = 2;
+                new_node -> right -> left = new CalcTree::Node_t ( *(node -> right) );
+
+                new_node -> left = new CalcTree::Node_t;
+                    new_node -> left -> data.op = '-';
+                
+                new_node -> left -> right = new CalcTree::Node_t;
+                    new_node -> left -> right -> data.op = '*';
+
+                new_node -> left -> left = new CalcTree::Node_t;
+                    new_node -> left -> left -> data.op = '*';
+
+                new_node -> left -> right -> right = differentiate (node -> right);
+                new_node -> left -> right -> left  = new CalcTree::Node_t ( *(node -> left) );
+
+                new_node -> left -> left -> left  = differentiate (node -> left);
+                new_node -> left -> left -> right = new CalcTree::Node_t ( *(node -> right) );
+                return new_node;
+                break;
+            default: delete new_node; abort (); break;
         }
     }
 
