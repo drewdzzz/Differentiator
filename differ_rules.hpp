@@ -42,11 +42,13 @@ struct diff_funcs
                 new_node -> left  = differentiate ( node -> left  );
                 new_node -> right = differentiate ( node -> right );
                 break;
+
             case '-':
                 new_node -> data.op = '-';
                 new_node -> left  = differentiate ( node -> left  );
                 new_node -> right = differentiate ( node -> right );
                 break;
+
             case '*':
                 new_node -> data.op = '+';
                 new_node -> left = new CalcTree::Node_t;
@@ -60,6 +62,7 @@ struct diff_funcs
                 new_node -> right -> right = differentiate (node -> right);
                 new_node -> right -> left = new CalcTree::Node_t ( *(node -> left) );
                 break;
+
             case '/':
                 new_node -> data.op = '/';
                 new_node -> right = new CalcTree::Node_t;
@@ -84,6 +87,31 @@ struct diff_funcs
                 new_node -> left -> left -> left  = differentiate (node -> left);
                 new_node -> left -> left -> right = new CalcTree::Node_t ( *(node -> right) );
                 break;
+
+            case '^':
+            {
+                char* ln = strdup ("ln");
+                assert (ln);
+
+                new_node -> data.op = '*';
+                new_node -> right = new CalcTree::Node_t ( *node );
+
+                CalcTree::Node_t *left_part = new CalcTree::Node_t; 
+                assert (left_part); 
+
+                left_part -> data.op = '*';
+                left_part -> left = new CalcTree::Node_t ( *(node -> right) ); 
+                left_part -> right = new CalcTree::Node_t;
+                    left_part -> right -> data.un_func = get_un_function_code (ln);     
+                left_part -> right -> right = new CalcTree::Node_t ( *(node -> left) );
+
+                new_node -> left = differentiate (left_part);
+
+                CalcTree::free_tree (left_part);
+
+                free (ln);
+                break;
+            }
             default: delete new_node; new_node = nullptr; exit(228); break;
         }
         return new_node;

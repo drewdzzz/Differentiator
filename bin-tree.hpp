@@ -75,7 +75,7 @@ public:
             }   
         }
 
-        Node_t & operator = (const Node_t &other)  //Оператор копирования
+        Node_t & operator = (const Node_t &other)  //Оператор копирования (Создаёт НОВЫЕ НОДЫ рекурсивно, вроде как проверено)
         {
             this -> data = other.data;
             if (this -> left)
@@ -255,18 +255,17 @@ public:
             system ("xdg-open tree_dump.png");
     }
 
-protected:
     ///@brief A function for destructor... and btw it's private so it's NOT UR BUSINESS
-    void free_tree (Node_t *tree)
+    static void free_tree (Node_t *tree)
     {
         if (tree)
         {
             free_tree (tree -> left );
             free_tree (tree -> right);
-            delete (tree);
+            delete tree;
         }
     }
-
+protected:
     //-----------------------------------------------------------------------------------------------------
     //Overloads of print function for dumping or drawing
     //-----------------------------------------------------------------------------------------------------
