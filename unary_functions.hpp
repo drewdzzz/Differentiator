@@ -43,6 +43,7 @@ char get_un_function_code (char* func)
 
 char* get_un_func_by_code (char code)
 {
+    printf ("code: %d\n", code);
     assert ( code < sizeof (un_functions) );
     char* res = strdup (un_functions[code]);
     return res;

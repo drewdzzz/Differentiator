@@ -9,20 +9,25 @@ struct diff_funcs
 {
     static CalcTree::Node_t* differentiate (CalcTree::Node_t *node)
     {
-        CalcTree::Node_t *new_node = new CalcTree::Node_t;
         if (node -> data.variable)
         {
+            CalcTree::Node_t *new_node = new CalcTree::Node_t;
             new_node -> data.value = 1;
             return new_node;
         }
         if ( CalcTree::is_leaf (node) && ! node -> data.variable )
         {
+            CalcTree::Node_t *new_node = new CalcTree::Node_t;
             new_node -> data.value = 0;
             return new_node;   
         }
         if ( node -> data.op )
         {
             return operator_diff (node);
+        }
+        if ( node -> data.un_func )
+        {
+            return unary_function_diff (node);
         }
 
     }
@@ -36,13 +41,12 @@ struct diff_funcs
                 new_node -> data.op = '+';
                 new_node -> left  = differentiate ( node -> left  );
                 new_node -> right = differentiate ( node -> right );
-                return new_node;
                 break;
             case '-':
                 new_node -> data.op = '-';
                 new_node -> left  = differentiate ( node -> left  );
                 new_node -> right = differentiate ( node -> right );
-                return new_node;
+                break;
             case '*':
                 new_node -> data.op = '+';
                 new_node -> left = new CalcTree::Node_t;
@@ -55,7 +59,6 @@ struct diff_funcs
 
                 new_node -> right -> right = differentiate (node -> right);
                 new_node -> right -> left = new CalcTree::Node_t ( *(node -> left) );
-                return new_node;
                 break;
             case '/':
                 new_node -> data.op = '/';
@@ -80,12 +83,27 @@ struct diff_funcs
 
                 new_node -> left -> left -> left  = differentiate (node -> left);
                 new_node -> left -> left -> right = new CalcTree::Node_t ( *(node -> right) );
-                return new_node;
                 break;
-            default: delete new_node; abort (); break;
+            default: delete new_node; new_node = nullptr; exit(228); break;
         }
+        return new_node;
     }
 
+    static CalcTree::Node_t* unary_function_diff (CalcTree::Node_t *node)
+    {
+        CalcTree::Node_t *new_node = new CalcTree::Node_t;
+        if ( is_this_un_func (node -> data.un_func, "ln") )
+        {
+            new_node -> data.op = '/';
+            new_node -> left  = differentiate (node -> right);
+            new_node -> right = new CalcTree::Node_t ( *(node -> right) ); 
+        }
+        else
+        {    
+            exit(1488);
+        }
+        return new_node;
+    }
 
 };
 
