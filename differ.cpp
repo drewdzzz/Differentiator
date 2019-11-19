@@ -12,6 +12,7 @@ int main ()
         abort ();
     }
 
+    differ.write_example (stdout);
     CalcTree differed;
     delete differed.head;
     DFE::ERR ERR_CODE = DFE::OK;
@@ -24,6 +25,8 @@ int main ()
     differed.write_example (stdout);
     printf ("\n");
     differed.draw ("open");
+
+
 
     return 0;
 }
