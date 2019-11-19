@@ -23,14 +23,22 @@ inline void father_to_son (CalcTree::Node_t *father, CalcTree::Node_t *son)
 
 struct diff_funcs 
 {
-    static CalcTree::Node_t* differentiate (CalcTree::Node_t *node, DFE::ERR &err_code)
+    static CalcTree::Node_t* differentiate (CalcTree::Node_t *node, const char &diff_var, DFE::ERR &err_code)
     {
         err_code = DFE::OK;
 
         if (node -> data.variable)
         {
             CalcTree::Node_t *new_node = new CalcTree::Node_t;
-            new_node -> data.value = 1;
+            if ( node -> data. variable == diff_var )
+            {
+                new_node -> data.value = 1;
+            }
+            else
+            {
+                new_node -> data.value = 0;
+            }
+            
             return new_node;
         }
         else if ( CalcTree::is_leaf (node) && ! node -> data.variable )
@@ -41,11 +49,11 @@ struct diff_funcs
         }
         else if ( node -> data.op )
         {
-            return operator_diff (node, err_code);
+            return operator_diff (node, diff_var, err_code);
         }
         else if ( node -> data.un_func )
         {
-            return unary_function_diff (node, err_code);
+            return unary_function_diff (node, diff_var, err_code);
         }
         else 
         {
@@ -55,7 +63,7 @@ struct diff_funcs
 
     }
 
-    static CalcTree::Node_t* operator_diff (CalcTree::Node_t *node, DFE::ERR &err_code)
+    static CalcTree::Node_t* operator_diff (CalcTree::Node_t *node, const char &diff_var, DFE::ERR &err_code)
     {
         CalcTree::Node_t *new_node = new CalcTree::Node_t;
 
@@ -64,10 +72,10 @@ struct diff_funcs
             case '+':
                 new_node -> data.op = '+';
 
-                new_node -> left  = differentiate ( node -> left, err_code  );
+                new_node -> left  = differentiate ( node -> left, diff_var, err_code  );
                     father_to_son ( new_node, new_node -> left );
 
-                new_node -> right = differentiate ( node -> right, err_code );
+                new_node -> right = differentiate ( node -> right, diff_var, err_code );
                     father_to_son ( new_node, new_node -> right );
 
                 break;
@@ -75,10 +83,10 @@ struct diff_funcs
             case '-':
                 new_node -> data.op = '-';
 
-                new_node -> left  = differentiate ( node -> left, err_code  );
+                new_node -> left  = differentiate ( node -> left, diff_var, err_code  );
                     father_to_son ( new_node,   new_node -> left );
 
-                new_node -> right = differentiate ( node -> right, err_code );
+                new_node -> right = differentiate ( node -> right, diff_var, err_code );
                     father_to_son ( new_node,   new_node -> right );
 
                 break;
@@ -94,13 +102,13 @@ struct diff_funcs
                     new_node -> right -> data.op = '*';
                     father_to_son ( new_node,   new_node -> right );
 
-                new_node -> left -> left = differentiate (node -> left, err_code);
+                new_node -> left -> left = differentiate (node -> left, diff_var, err_code);
                     father_to_son ( new_node -> left,   new_node -> left -> left );
 
                 new_node -> left -> right = new CalcTree::Node_t ( *(node -> right) );
                     father_to_son ( new_node -> left,   new_node -> left -> right );
 
-                new_node -> right -> right = differentiate (node -> right, err_code);
+                new_node -> right -> right = differentiate (node -> right, diff_var, err_code);
                     father_to_son ( new_node -> right,   new_node -> right -> right );
 
                 new_node -> right -> left = new CalcTree::Node_t ( *(node -> left) );
@@ -134,13 +142,13 @@ struct diff_funcs
                     new_node -> left -> left -> data.op = '*';
                     father_to_son ( new_node -> left,   new_node -> left -> left );
 
-                new_node -> left -> right -> right = differentiate (node -> right, err_code);
+                new_node -> left -> right -> right = differentiate (node -> right, diff_var, err_code);
                     father_to_son ( new_node -> left -> right,   new_node -> left -> right -> right );
 
                 new_node -> left -> right -> left  = new CalcTree::Node_t ( *(node -> left) );
                     father_to_son ( new_node -> left -> right,   new_node -> left -> right -> left );
 
-                new_node -> left -> left -> left  = differentiate (node -> left,   err_code);
+                new_node -> left -> left -> left  = differentiate (node -> left, diff_var,  err_code);
                     father_to_son ( new_node -> left -> left,   new_node -> left -> left -> left );
 
                 new_node -> left -> left -> right = new CalcTree::Node_t ( *(node -> right) );
@@ -172,7 +180,7 @@ struct diff_funcs
                 left_part -> right -> right = new CalcTree::Node_t ( *(node -> left) );
                     father_to_son ( left_part -> right,   left_part -> right -> right );
 
-                new_node -> left = differentiate (left_part, err_code);
+                new_node -> left = differentiate (left_part, diff_var, err_code);
                     father_to_son ( new_node,   new_node -> left );
 
                 CalcTree::free_tree (left_part);
@@ -189,7 +197,7 @@ struct diff_funcs
         return new_node;
     }
 
-    static CalcTree::Node_t* unary_function_diff (CalcTree::Node_t *node, DFE::ERR &err_code)
+    static CalcTree::Node_t* unary_function_diff (CalcTree::Node_t *node, const char &diff_var, DFE::ERR &err_code)
     {
         CalcTree::Node_t *new_node = new CalcTree::Node_t;
 
@@ -197,7 +205,7 @@ struct diff_funcs
         {
             new_node -> data.op = '/';
 
-            new_node -> left  = differentiate (node -> right, err_code);
+            new_node -> left  = differentiate (node -> right, diff_var, err_code);
                 father_to_son (new_node,   new_node -> left);
 
             new_node -> right = new CalcTree::Node_t ( *(node -> right) ); 
@@ -216,7 +224,7 @@ struct diff_funcs
             new_node -> left -> right = new CalcTree::Node_t ( *(node -> right) );
                 father_to_son ( new_node -> left,   new_node -> left -> right );
 
-            new_node -> right = differentiate (node -> right, err_code);
+            new_node -> right = differentiate (node -> right, diff_var, err_code);
                 father_to_son ( new_node,   new_node -> right );
 
             free (cos);
@@ -242,7 +250,7 @@ struct diff_funcs
             new_node -> left -> right -> right = new CalcTree::Node_t ( *(node -> right) );
                 father_to_son ( new_node -> left -> right,   new_node -> left -> right -> right );
 
-            new_node -> right = differentiate ( node -> right,   err_code );
+            new_node -> right = differentiate ( node -> right, diff_var, err_code );
                 father_to_son ( new_node,   new_node -> right );
 
             free (sin);
