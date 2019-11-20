@@ -4,4 +4,9 @@ differ.o
 Tree_draw.dot
 tree_draw.png
 Tree_dump.dot
+texput.log
 tree_dump.png
+diff_latex.aux
+diff_latex.log
+diff_latex.tex
+diff_latex.pdf

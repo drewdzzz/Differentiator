@@ -189,7 +189,94 @@ class CalcTree: public Tree_t <informative_value>
             part_insert_var (node -> right, variable, var_value, counter);
     }
 
+    void tex_undertree (FILE* stream, Node_t *node)
+    {
+        assert (node);
+        assert (stream);
+
+        if (! node -> left && ! node -> right )
+        {
+            if (node -> data.variable)
+            {    
+                fprintf (stream, "%c", node -> data.variable);
+                return;
+            }
+            fprintf (stream, "%lg", node -> data.value );
+            return;
+        }
+
+        bool low_priority = false;
+
+        if ( node -> data.op )
+        {
+            assert (node -> right);
+            assert (node -> left);
+
+            if ( node -> data.op == '/')
+            {
+                fprintf (stream, "\\frac"
+                                 "{");
+                tex_undertree (stream, node -> left);
+                fprintf (stream, "}"
+                                 "{");
+                tex_undertree (stream, node -> right);
+                fprintf (stream, "}");
+            }
+            else
+            {            
+
+                if ( node != head )
+                {
+                    assert ( node -> father );
+
+                    if ( get_op_priority (node -> data.op)  <  get_op_priority (node -> father -> data.op) )
+                    {
+                        low_priority = true;
+                        fprintf (stream, "( ");
+                    }
+                }
+
+                if ( node -> data.op == '^' && node -> left -> data.un_func) 
+                    fprintf (stream, "( ");
+
+                tex_undertree (stream, node -> left );
+
+                if ( node -> data.op == '^' && node -> left -> data.un_func) 
+                    fprintf (stream, " )");
+
+                fprintf (stream, " %c ", node -> data.op);
+                if ( node -> data.op == '^') 
+                    fprintf (stream, "{");
+                tex_undertree (stream, node -> right);
+                if ( node -> data.op == '^') 
+                    fprintf (stream, "}");
+
+                if (low_priority)
+                    fprintf (stream, " )");
+            }
+        }   
+       
+        if ( node -> data.un_func )
+        {
+            assert (node -> right);
+
+            fprintf (stream, "%s ( ", get_un_func_by_code ( node -> data.un_func ) );
+            tex_undertree (stream, node -> right);
+            fprintf (stream, " )");
+        } 
+    }
+
 public:
+
+    void tex_tree (FILE* stream)
+    {
+        assert (stream);
+        assert (head);
+
+        fprintf (stream, "$");
+        tex_undertree (stream, head);
+        fprintf (stream, "$");
+    }
 
     long insert_variable (const char variable, const double var_value)
     {   
