@@ -23,9 +23,19 @@ inline void father_to_son (CalcTree::Node_t *father, CalcTree::Node_t *son)
 
 struct diff_funcs 
 {
-    static CalcTree::Node_t* differentiate (CalcTree::Node_t *node, const char &diff_var, DFE::ERR &err_code)
+    static CalcTree differentiate_tree (CalcTree tree, char variable, DFE::ERR &err_code)
     {
         err_code = DFE::OK;
+        CalcTree *differed_tree = new CalcTree;
+        delete differed_tree -> head;
+        differed_tree -> head = differentiate (tree.head, variable, err_code);
+        return *differed_tree;
+    }
+
+private:
+
+    static CalcTree::Node_t* differentiate (CalcTree::Node_t *node, const char &diff_var, DFE::ERR &err_code)
+    {
 
         if (node -> data.variable)
         {

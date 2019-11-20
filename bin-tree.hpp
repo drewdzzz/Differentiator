@@ -106,6 +106,19 @@ public:
         head = new Node_t;
     }
 
+    ///@brief Copy constructor of Tree_t
+    Tree_t (const Tree_t &other)
+    {
+        *(this -> head) = *(other.head);
+    }
+
+    Tree_t &operator= (const Tree_t &other)
+    {
+        delete this -> head;
+        *(this -> head) = *(other.head);
+        return *this;
+    }
+
     ///@brief Destructor of Tree_t
     ~Tree_t ()
     {

@@ -13,23 +13,18 @@ int main ()
     }
 
     differ.write_example (stdout);
-    CalcTree differed;
-    delete differed.head;
-    DFE::ERR ERR_CODE = DFE::OK;
-    differed.head = diff_funcs::differentiate (differ.head, 'x', ERR_CODE);
-    differ.draw ("open");
     $p;
-    if (ERR_CODE != DFE::OK)
-        printf ("NOT OK\n");
+    DFE::ERR err_code;
+    CalcTree differed = diff_funcs::differentiate_tree (differ, 'x', err_code );
+
+    if (err_code != DFE::OK)
+        printf ("SOMETHING IS NOT OK!!");
+    $p;
+    differ.draw ("open");
+    $p;;
     differed.simplify( differed.head );
     differed.write_example (stdout);
     printf ("\n");
     differed.draw ("open");
-
-    differ.insert_variable ('x', 2);                      //НАПИШИ КОПИРОВАНИЕ ДЛЯ ДЕРЕВА CalcTree
-    differ.draw ("open");
-    differ.write_example (stdout);
-    differ.simplify( differ.head );
-    differ.write_example (stdout);
     return 0;
 }
