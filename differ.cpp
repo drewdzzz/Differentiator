@@ -62,7 +62,7 @@ int main ()
 
         std::cin>>times_to_differ>>variable_value;
 
-        printf (" %d %lf \n", times_to_differ, variable_value);
+        //printf (" %d %lf \n", times_to_differ, variable_value);
         CalcTree *differentiations = new CalcTree [times_to_differ];
         for (int i = 0; i < times_to_differ; i++)
         {

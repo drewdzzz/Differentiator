@@ -376,16 +376,56 @@ public:
 private:
     OPE::ERR simplify_unusuals (Node_t *node)
     {
-        if ( node -> data.op == '/' && is_leaf ( node -> right) && equal ( node -> right -> data.value, 0) )
+        if ( node -> data.op == '/' && right_operand_is_zero )
         {
            return OPE::DIVIDE_TO_ZERO;
         }
-        if ( node -> data.op == '/' && is_leaf ( node -> right) && equal ( node -> right -> data.value, 0) )
+        if ( node -> data.op == '/' && left_operand_is_zero )
         {
             kill_children (node);
             node -> data.value = 0;
             node -> data.op = 0;
             return OPE::OK;
+        }
+        if ( node -> data.op == '+')
+        { 
+            if ( left_operand_is_zero (node) )
+            {
+                if (! node -> father)
+                {
+                    head = node -> right;
+                }
+                else if (node -> father -> left == node)
+                {
+                    node -> father -> left = node -> right; //Подвешиваем то, что справа, к левой ветке
+                } 
+                else
+                {
+                    node -> father -> right = node -> right; //Подвешиваем то, что справа, к правой ветке
+                }
+                delete node -> left;
+                delete node; 
+                return OPE::OK;      
+            }
+            
+            if ( right_operand_is_zero (node) )
+            {
+                if (! node -> father)
+                {
+                    head = node -> left;
+                }
+                else if (node -> father -> left == node)
+                {
+                    node -> father -> left = node -> left; //Подвешиваем то, что слева, к левой ветке
+                } 
+                else
+                {
+                    node -> father -> right = node -> left; //Подвешиваем то, что слева, к правой ветке
+                }
+                delete node -> right;
+                delete node; 
+                return OPE::OK;      
+            }
         }
         if ( node -> data.op == '*' )
         {
@@ -396,24 +436,32 @@ private:
                 node -> data.value = 0;
                 return OPE::OK;
             }
-
             if (left_operand_is_one (node) )
             {
-                if (node -> father -> left == node)
+                if (! node -> father)
+                {
+                    head = node -> right;
+                }
+                else if (node -> father -> left == node)
                 {
                     node -> father -> left = node -> right; //Подвешиваем то, что справа, к левой ветке
-                } 
+                    } 
                 else
                 {
                     node -> father -> right = node -> right; //Подвешиваем то, что справа, к правой ветке
                 }
+                delete node -> left;
                 delete node; 
                 return OPE::OK;      
             }
             
             if (right_operand_is_one (node) )
             {
-                if (node -> father -> left == node)
+                if (! node -> father)
+                {
+                    head = node -> left;
+                }
+                else if (node -> father -> left == node)
                 {
                     node -> father -> left = node -> left; //Подвешиваем то, что слева, к левой ветке
                 } 
@@ -421,11 +469,12 @@ private:
                 {
                     node -> father -> right = node -> left; //Подвешиваем то, что слева, к правой ветке
                 }
+                delete node -> right;
                 delete node; 
                 return OPE::OK;      
             }
-            
         }
+        
     }
 
     OPE::ERR simplify (Node_t *node)
