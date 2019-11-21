@@ -1,6 +1,7 @@
 #include "differ-tree.hpp"
 
 const char*  INPUT_FILE = "diff.txt";
+const int BUFFERSIZE = 256;
 
 FILE* open_tex (const char* input_file)
 {
@@ -13,6 +14,15 @@ FILE* open_tex (const char* input_file)
                      "\\maketitle\n\n");
     return stream;
 }
+
+void send_differentiation (char* mail)
+{
+    char command[BUFFERSIZE] = {};
+    snprintf (command, sizeof (command), "echo 'Differentiation' | mail -s 'Differentiation' -A diff_latex.pdf %s", mail );
+    system (command); 
+
+}
+
 void close_and_make_tex (FILE* stream)
 {
     fprintf (stream, "\n\n\\end{document}");
@@ -99,6 +109,12 @@ int main ()
 
    // }
 
+    char mail[BUFFERSIZE] = {};
+
+    std::cout<<"Enter your email"<<std::endl;
+    std::cin>>mail;
+
+    send_differentiation (mail);
     close_and_make_tex (tex_stream);
     return 0;
 }
