@@ -46,7 +46,6 @@ int main ()
     if ( ! tex_stream  )
         exit (226);
 
-    differ.simplify_tree ();
 
     fprintf (tex_stream, "Your function: \\\\*");
     differ.tex_tree (tex_stream);
