@@ -114,7 +114,7 @@ public:
 
     Tree_t &operator= (const Tree_t &other)
     {
-        delete this -> head;
+        //delete this -> head;
         *(this -> head) = *(other.head);
         return *this;
     }

@@ -368,7 +368,12 @@ public:
         return ( is_leaf (node -> left) &&  ( ( ! node -> left -> data.variable ) && equal (node -> left -> data.value, 1) ) );
     }
 
+    OPE::ERR simplify_tree ()
+    {
+        return simplify (head);
+    }
 
+private:
     OPE::ERR simplify_unusuals (Node_t *node)
     {
         if ( node -> data.op == '/' && is_leaf ( node -> right) && equal ( node -> right -> data.value, 0) )
