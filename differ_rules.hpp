@@ -30,7 +30,7 @@ struct diff_funcs
         if (node -> data.variable)
         {
             CalcTree::Node_t *new_node = new CalcTree::Node_t;
-            if ( node -> data. variable == diff_var )
+            if ( node -> data.variable == diff_var )
             {
                 new_node -> data.value = 1;
             }

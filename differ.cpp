@@ -43,57 +43,62 @@ int main ()
     fprintf (tex_stream, "\\\\ \\\\");
 
     int times_to_differ = 0;
+    double variable_value = 0.0;
 
     DFE::ERR err_code = DFE::OK;
 
     CalcTree differed;
 
 
-    printf ("How many times do you want to differentiate?\n");
-    if ( ! scanf ("%d", &times_to_differ) )
+    printf ("How many times do you want to differentiate and what's the value of your variable?\n");
+    /*if ( scanf (" %d %lf ", &times_to_differ, &variable_value) != 2 )
     {
         printf ("Can't understand you. I'll just show you your example\n");
         $p;
+        $p;
     }
     else
-    {
-        char variable = 'x';
+    {  */ 
 
-        printf ("What variable do you want to differentiate?\n");
-        fflush (stdin);
-        if ( ! scanf (" %c ", &variable) )
-        {
-            printf ("Can't understand you. I will defferentiate to x");
-            $p;
-            $p;
-        }
+        std::cin>>times_to_differ>>variable_value;
 
+        printf (" %d %lf \n", times_to_differ, variable_value);
         CalcTree *differentiations = new CalcTree [times_to_differ];
-        DFE::ERR err_code = DFE::OK;
         for (int i = 0; i < times_to_differ; i++)
         {
             delete differentiations[i].head;
-            fprintf (tex_stream, "The %d differentiation: \\\\", i+1);
             if (i == 0)
             {
-                differentiations[i].head = diff_funcs::differentiate (differ.head, variable, err_code);
+                differentiations[i].head = diff_funcs::differentiate (differ.head, 'x', err_code);
                 if (err_code != DFE::OK)
                     exit (123);
             }
             else
             {
-                differentiations[i].head = diff_funcs::differentiate (differentiations[i-1].head, variable, err_code);
+                differentiations[i].head = diff_funcs::differentiate (differentiations[i-1].head, 'x', err_code);
                 if (err_code != DFE::OK)
                     exit (123);
             }
-            differentiations[i].simplify_tree ();
-            differentiations[i].tex_tree (tex_stream);
-            fprintf (tex_stream,"\\\\ \\\\");
+        }
+
+    
+        for (int i = 0; i < times_to_differ; i++)
+        {
+                fprintf (tex_stream, "The %d differentiation: \\\\", i+1);
+                differentiations[i].simplify_tree ();
+                differentiations[i].tex_tree (tex_stream);
+                fprintf (tex_stream,"\\\\\\\\Insert the variable: \\\\");
+                differentiations[i].insert_variable ('x', variable_value);
+                differentiations[i].tex_tree (tex_stream);
+                fprintf (tex_stream,"\\\\\\\\Calculate: \\\\");
+                differentiations[i].simplify_tree ();
+                differentiations[i].tex_tree (tex_stream);
+                fprintf (tex_stream,"\\\\ \\\\");
         }
 
 
-    }
-    
+   // }
+
     close_and_make_tex (tex_stream);
     return 0;
 }
