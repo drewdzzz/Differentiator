@@ -7,7 +7,7 @@
 #include "unary_functions.hpp"
 
 static const double EPSILON    = 0.0001;
-const int    BUFSIZE    = 10;
+static const int    BUFSIZE    = 512;
 
 bool equal (double a, double b)
 {
@@ -46,79 +46,159 @@ class CalcTree: public Tree_t <informative_value>
         }
     }
 
-    CTE::ERR read_undertree (FILE* stream, Node_t *node, char* treeInput)
-    {  
-        if ( fscanf (stream, " %lf ", &(node -> data.value) ) )
+    Node_t* Get_G (char *&input)
+    {
+        Node_t* node = Get_E (input); 
+        if ( *input == 0 )
         {
-            fscanf (stream, " %c ", &symb);
-            if ( symb != ')' )
-                return CTE::NOT_READ; 
-            return CTE::OK;
-        } 
+            return node;
+        }
+        else
+        {
+            printf ("%c", *input);
+            free_tree (node);
+            $p;
+            $p;
+            assert (false);
+            return nullptr;
+        }
+        
+    }
 
-        if ( fscanf (stream, " %[A-Za-z] ", treeInput) )
-            if ( strlen (treeInput) != 1 )
+    Node_t* Get_E (char *&input)
+    {
+        Node_t* node = Get_T (input);
+        Node_t* new_node = nullptr;
+        while ( *input == '+' || *input == '-' )
+        {
+            new_node = new Node_t;
+
+            new_node -> data.op = *input;
+            new_node -> left = node;
+            node -> father = new_node;
+            node = new_node;
+            new_node = nullptr;
+
+            input++;
+
+            node -> right = Get_T (input);
+            node -> right -> father = node;
+        }
+        return node;
+    }
+
+    Node_t* Get_T (char *&input)
+    {
+        Node_t* node = Get_P (input);
+        Node_t* new_node = nullptr;
+        while ( *input == '*' || *input == '/' )
+        {
+            new_node = new Node_t;
+
+            new_node -> data.op = *input;
+            new_node -> left = node;
+            node -> father = new_node;
+            node = new_node;
+            new_node = nullptr;
+
+            input++;
+
+            node -> right = Get_P (input);
+            node -> right -> father = node;
+        }
+        return node;     
+    }
+
+    Node_t* Get_P (char *&input)
+    {
+        if ( *input == '(' )
+        {
+            input++;
+            Node_t* node = Get_E (input);
+            if ( *input == ')' )
             {
-                if ( is_un_function (treeInput) )
-                {
-                    node -> data.un_func = get_un_function_code (treeInput);
-                    make_right (node, {});
-
-                    fscanf (stream, " %c ", &symb);
-                    if ( symb != '(' )
-                        return CTE::NOT_READ;
-                    if ( read_undertree (stream, node -> right, treeInput) == CTE::NOT_READ )
-                        return CTE::NOT_READ;  
-                    fscanf (stream, " %c ", &symb);
-                    if ( symb != ')' )
-                        return CTE::NOT_READ; 
-                    return CTE::OK;
-                } 
+                input++;
             }
             else
             {
-                node -> data.variable = treeInput [0];
-                has_variable = true;
-                fscanf (stream, " %c ", &symb);
-                if ( symb != ')' )
-                    return CTE::NOT_READ; 
-                return CTE::OK;
+                assert (false);
+                return nullptr;
             }
+            return node;
+        }
+        else
+        {
+            if ( *input >= '0' && *input <= '9' )
+                return Get_N (input);
+            else
+                return Get_F (input);
             
+        } 
+    }
 
-        fscanf (stream, " %c ", &symb);
-        if ( symb == '(' )
+    Node_t* Get_F (char *&input)
+    {
+        char letters[BUFSIZE] = {};
+        int read_count = 0;
+        Node_t *new_node = new Node_t;
+        if ( ! sscanf (input, "%[A-Za-z]%n", letters, &read_count) )
         {
-            make_left (node, {}); 
-            if ( read_undertree (stream, node -> left, treeInput) == CTE::NOT_READ )
-                return CTE::NOT_READ;
+            assert (false);                       //LOOK!!!!
         }
-        
-        fscanf (stream, " %c ", &symb);
-        if ( is_operator (symb) )
+        input += read_count;
+        if ( is_un_function (letters) ) 
         {
-            node -> data.op = symb;
+            if ( *input == '(')
+            {
+                input++;
+                Get_E (input);
+            }
+
+            if ( *input == ')' )
+            {
+                input++;
+            }
+            else 
+            {
+                assert (false);
+                return nullptr;
+            }
+            new_node -> data.un_func = get_un_function_code (letters);
         }
         else
         {
-            return CTE::NOT_READ;
+            new_node -> data.variable = letters[0];
         }
-        
-        fscanf (stream, " %c ", &symb);
-        if ( symb == '(' )
+        return new_node;    
+    }
+
+    Node_t* Get_N (char *&input)
+    {
+        bool worked = false;
+        double value = 0.0;
+        int read_count = 0;
+        if ( ! sscanf (input, "%lf%n", &value, &read_count) )
         {
-             make_right (node, {}); 
-             if ( read_undertree (stream, node -> right, treeInput) == CTE::NOT_READ )
-                return CTE::NOT_READ;
+            assert (false);
         }
-        
-        fscanf (stream, " %c ", &symb);
-        if ( symb == ')' ) 
-            return CTE::OK;
-        else
-        {
-            return CTE::NOT_READ; 
-        }  
+        input += read_count;
+        Node_t *new_node = new Node_t;
+        new_node -> data.value = value;
+        return new_node;
+    }
+
+public: 
+    CTE::ERR read_tree (const char* input_file)
+    {  
+
+        char input [BUFSIZE] = {};
+        char* pos = &input[0];
+        scanf (" %[^\n]", input);
+        //УДАЛИТЬ ПРОБЕЛЫ!!!
+        head = Get_G (pos);
+        assert (head);
+        return CTE::OK;
+
     }
 
     void write_ex_part (FILE* stream, Node_t *node)
@@ -306,28 +386,6 @@ public:
             result = use_un_func (node -> data.un_func, b);
         }
         return OPE::OK;
-    }
-
-
-    CTE::ERR read_tree (const char* input_file)
-    {
-        FILE* stream = fopen (input_file, "r");
-        assert (stream);
-        char begin = 0;
-
-        fscanf (stream, " %c ", &begin);
-        if ( begin != '(' )
-            return CTE::NOT_READ;
-
-        char treeInput[BUFSIZE] = {};
-
-        CTE::ERR res = read_undertree (stream, head, treeInput);
-        if (res != CTE::OK)
-        {
-            free_tree (head);
-        }
-        fclose (stream);
-        return res;
     }
 
     void write_example (FILE* stream) 

@@ -37,11 +37,15 @@ int main ()
     CalcTree differ;
     if ( differ.read_tree (INPUT_FILE) == CTE::OK )
         printf ("That's nice!\n");
-    else
+   /* else
     {
         abort ();
-    }
+    }*/
 
+    differ.dump ("open");
+
+
+/*
     FILE *tex_stream = open_tex ("diff_latex.tex");
     if ( ! tex_stream  )
         exit (226);
@@ -69,6 +73,7 @@ int main ()
     else
     {  */ 
 
+/*
         std::cin>>times_to_differ>>variable_value;
 
         //printf (" %d %lf \n", times_to_differ, variable_value);
@@ -114,6 +119,7 @@ int main ()
     std::cin>>mail;
 
     send_differentiation (mail);
-    close_and_make_tex (tex_stream);
+    close_and_make_tex (tex_stream);*/
     return 0;
+    
 }
