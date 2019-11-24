@@ -165,7 +165,7 @@ class CalcTree: public Tree_t <informative_value>
             }
             return node;
         }
-        else if ( *input >= '0' && *input <= '9' )
+        else if ( (*input >= '0' && *input <= '9') || (*input == '-') )
         {
             return Get_N (input);
         }
@@ -218,7 +218,6 @@ class CalcTree: public Tree_t <informative_value>
 
     Node_t* Get_N (char *&input)
     {
-        bool worked = false;
         double value = 0.0;
         int read_count = 0;
         if ( ! sscanf (input, "%lf%n", &value, &read_count) )
@@ -240,6 +239,7 @@ public:
         char err_symb = 0;
         scanf (" %[^\n]", input);
         delete_spaces (input);
+        free_tree (head);
         head = Get_G (pos, err_symb);
         if (err_symb != 0)
             return err_symb;

@@ -46,7 +46,7 @@ int main ()
         exit (13);
     }
 
-    differ.draw ("open");
+    //differ.draw ("open");
 
     FILE *tex_stream = open_tex ("diff_latex.tex");
     if ( ! tex_stream  )
@@ -65,53 +65,66 @@ int main ()
     CalcTree differed;
 
 
-    printf ("How many times do you want to differentiate and what's the value of your variable?\n");
-    scanf (" %d%lf", &times_to_differ, &variable_value);
+    printf ("How many times do you want to differentiate?\n");
+    scanf ("%d", &times_to_differ);
+    printf ("What's the value of your variable?\n");
+    scanf ("%lf", &variable_value);
 
-        printf (" %d %lf \n", times_to_differ, variable_value);
-        CalcTree *differentiations = new CalcTree [times_to_differ];
+    CalcTree *differentiations = new CalcTree [times_to_differ];
 
-        for (int i = 0; i < times_to_differ; i++)
+    for (int i = 0; i < times_to_differ; i++)
+    {
+        delete differentiations[i].head;
+        if (i == 0)
         {
-            delete differentiations[i].head;
-            if (i == 0)
+            differentiations[i].head = diff_funcs::differentiate (differ.head, 'x', err_code);
+            if (err_code != DFE::OK)
             {
-                differentiations[i].head = diff_funcs::differentiate (differ.head, 'x', err_code);
-                if (err_code != DFE::OK)
-                    exit (123);
-            }
-            else
-            {
-                differentiations[i].head = diff_funcs::differentiate (differentiations[i-1].head, 'x', err_code);
-                if (err_code != DFE::OK)
-                    exit (123);
+                printf ("I don't nave so much memory:(");
+                $p;
+                $p;
+                exit(1);
             }
         }
+        else
+        {
+            differentiations[i].head = diff_funcs::differentiate (differentiations[i-1].head, 'x', err_code);
+            if (err_code != DFE::OK)
+            {
+                printf ("I don't nave so much memory:(");
+                $p;
+                $p;
+                exit(1);
+            }
+        }
+    }
     
-        for (int i = 0; i < times_to_differ; i++)
-        {
-                fprintf (tex_stream, "The %d differentiation: \\\\", i+1);
-                differentiations[i].simplify_tree ();
-                differentiations[i].tex_tree (tex_stream);
-                fprintf (tex_stream,"\\\\\\\\Let x be %lg: \\\\", variable_value);
-                differentiations[i].insert_variable ('x', variable_value);
-                differentiations[i].tex_tree (tex_stream);
-                fprintf (tex_stream,"\\\\\\\\Calculate: \\\\");
-                differentiations[i].simplify_tree ();
-                differentiations[i].tex_tree (tex_stream);
-                fprintf (tex_stream,"\\\\ \\\\");
-        }
-
-
+    for (int i = 0; i < times_to_differ; i++)
+    {
+            fprintf (tex_stream, "The %d differentiation: \\\\", i+1);
+            differentiations[i].simplify_tree ();
+            differentiations[i].tex_tree (tex_stream);
+            differentiations[i].draw ("open");
+            $p;
+            $p;
+            fprintf (tex_stream,"\\\\\\\\Let x be %lg: \\\\", variable_value);
+            differentiations[i].insert_variable ('x', variable_value);
+            differentiations[i].tex_tree (tex_stream);
+            fprintf (tex_stream,"\\\\\\\\Calculate: \\\\");
+            differentiations[i].simplify_tree ();
+            differentiations[i].tex_tree (tex_stream);
+            fprintf (tex_stream,"\\\\ \\\\");
+    }
 
     char mail[BUFFERSIZE] = {};
 
-    std::cout<<"Enter your email"<<std::endl;
-    std::cin>>mail;
+    printf ("Enter your email\n");
+    scanf ("%s", mail);
 
     close_and_make_tex (tex_stream);
 
     send_differentiation (mail);
+
     return 0;
     
 }
