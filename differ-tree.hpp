@@ -65,18 +65,18 @@ class CalcTree: public Tree_t <informative_value>
         }
     }
 
-    Node_t* Get_G (char *&input)
+    Node_t* Get_G (char *&input, char &error)
     {
         Node_t* node = Get_E (input); 
         if ( *input == 0 )
         {
+            error = 0;
             return node;
         }
         else
         {
-            printf ("%c", *input);
             free_tree (node);
-            assert (false);
+            error = *input;
             return nullptr;
         }
         
@@ -106,9 +106,31 @@ class CalcTree: public Tree_t <informative_value>
 
     Node_t* Get_T (char *&input)
     {
+        Node_t* node = Get_K (input);
+        Node_t* new_node = nullptr;
+        while ( *input == '*' || *input == '/')
+        {
+            new_node = new Node_t;
+
+            new_node -> data.op = *input;
+            new_node -> left = node;
+            node -> father = new_node;
+            node = new_node;
+            new_node = nullptr;
+
+            input++;
+
+            node -> right = Get_K (input);
+            node -> right -> father = node;
+        }
+        return node;     
+    }
+
+    Node_t* Get_K (char *&input)
+    {
         Node_t* node = Get_P (input);
         Node_t* new_node = nullptr;
-        while ( *input == '*' || *input == '/' )
+        while ( *input == '^')
         {
             new_node = new Node_t;
 
@@ -210,16 +232,18 @@ class CalcTree: public Tree_t <informative_value>
     }
 
 public: 
-    CTE::ERR read_tree (const char* input_file)
+    char read_tree ()
     {  
 
         char input [BUFSIZE] = {};
         char* pos = &input[0];
+        char err_symb = 0;
         scanf (" %[^\n]", input);
         delete_spaces (input);
-        head = Get_G (pos);
-        assert (head);
-        return CTE::OK;
+        head = Get_G (pos, err_symb);
+        if (err_symb != 0)
+            return err_symb;
+        return 0;
 
     }
 

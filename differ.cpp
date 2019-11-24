@@ -35,23 +35,25 @@ void close_and_make_tex (FILE* stream)
 int main ()
 {
     CalcTree differ;
-    if ( differ.read_tree (INPUT_FILE) == CTE::OK )
-        printf ("That's nice!\n");
-   /* else
+    printf ("Enter your expression (I will differentiate only by x!!): \n");
+    char last_symb = 0;
+    last_symb = differ.read_tree ();
+    if (last_symb)
     {
-        abort ();
-    }*/
+        printf ("SYNTAX ERROR near %c\n", last_symb);
+        $p;
+        $p;
+        exit (13);
+    }
 
-    differ.dump ("open");
+    differ.draw ("open");
 
-
-/*
     FILE *tex_stream = open_tex ("diff_latex.tex");
     if ( ! tex_stream  )
         exit (226);
 
 
-    fprintf (tex_stream, "Your function: \\\\*");
+    fprintf (tex_stream, "Your function: \n");
     differ.tex_tree (tex_stream);
     fprintf (tex_stream, "\\\\ \\\\");
 
@@ -64,20 +66,11 @@ int main ()
 
 
     printf ("How many times do you want to differentiate and what's the value of your variable?\n");
-    /*if ( scanf (" %d %lf ", &times_to_differ, &variable_value) != 2 )
-    {
-        printf ("Can't understand you. I'll just show you your example\n");
-        $p;
-        $p;
-    }
-    else
-    {  */ 
+    scanf (" %d%lf", &times_to_differ, &variable_value);
 
-/*
-        std::cin>>times_to_differ>>variable_value;
-
-        //printf (" %d %lf \n", times_to_differ, variable_value);
+        printf (" %d %lf \n", times_to_differ, variable_value);
         CalcTree *differentiations = new CalcTree [times_to_differ];
+
         for (int i = 0; i < times_to_differ; i++)
         {
             delete differentiations[i].head;
@@ -94,14 +87,13 @@ int main ()
                     exit (123);
             }
         }
-
     
         for (int i = 0; i < times_to_differ; i++)
         {
                 fprintf (tex_stream, "The %d differentiation: \\\\", i+1);
                 differentiations[i].simplify_tree ();
                 differentiations[i].tex_tree (tex_stream);
-                fprintf (tex_stream,"\\\\\\\\Insert the variable: \\\\");
+                fprintf (tex_stream,"\\\\\\\\Let x be %lg: \\\\", variable_value);
                 differentiations[i].insert_variable ('x', variable_value);
                 differentiations[i].tex_tree (tex_stream);
                 fprintf (tex_stream,"\\\\\\\\Calculate: \\\\");
@@ -111,15 +103,15 @@ int main ()
         }
 
 
-   // }
 
     char mail[BUFFERSIZE] = {};
 
     std::cout<<"Enter your email"<<std::endl;
     std::cin>>mail;
 
+    close_and_make_tex (tex_stream);
+
     send_differentiation (mail);
-    close_and_make_tex (tex_stream);*/
     return 0;
     
 }
