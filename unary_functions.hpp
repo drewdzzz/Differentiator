@@ -20,7 +20,10 @@ bool is_this_un_func (char code, const char* func)
 
 bool is_un_function (char* potential_func)
 {
-    for (char i = 0; i < sizeof (un_functions); i++)
+    if ( strlen (potential_func) == 1)
+        return false;
+        
+    for (char i = 1; i < sizeof (un_functions); i++)
         if ( ! strcmp (un_functions[i], potential_func) )
             return true;
     
@@ -29,7 +32,7 @@ bool is_un_function (char* potential_func)
 
 char get_un_function_code (char* func)
 {
-    for (char i = 0; i < sizeof (un_functions); i++)
+    for (char i = 1; i < sizeof (un_functions); i++)
     {
         if ( ! strcmp (un_functions[i], func) )
         {

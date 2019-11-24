@@ -76,8 +76,6 @@ class CalcTree: public Tree_t <informative_value>
         {
             printf ("%c", *input);
             free_tree (node);
-            $p;
-            $p;
             assert (false);
             return nullptr;
         }
@@ -145,14 +143,14 @@ class CalcTree: public Tree_t <informative_value>
             }
             return node;
         }
+        else if ( *input >= '0' && *input <= '9' )
+        {
+            return Get_N (input);
+        }
         else
         {
-            if ( *input >= '0' && *input <= '9' )
-                return Get_N (input);
-            else
-                return Get_F (input);
-            
-        } 
+            return Get_F (input);
+        }    
     }
 
     Node_t* Get_F (char *&input)
@@ -164,9 +162,10 @@ class CalcTree: public Tree_t <informative_value>
 
         if ( ! sscanf (input, "%[A-Za-z]%n", letters, &read_count) )
         {
-            assert (false);                       //LOOK!!!!
+            assert (false);                      
         }
         input += read_count;
+
         if ( is_un_function (letters) ) 
         {
             if ( *input == '(')
