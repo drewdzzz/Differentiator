@@ -23,6 +23,25 @@ namespace CTE
     } LAST_ERROR;
 };
 
+void delete_spaces (char* input)
+{
+    while (*input)
+    {
+        if (*input == ' ')
+        {
+            int i = 1;
+            for (i = 1; i < strlen (input) ; i++)
+                input [i-1] = input [i];
+            input [i-1] = 0;
+        }
+        else
+        {
+            input++;
+        }
+        
+    }
+}
+
 class CalcTree: public Tree_t <informative_value>
 {
     char symb = 0;
@@ -141,6 +160,8 @@ class CalcTree: public Tree_t <informative_value>
         char letters[BUFSIZE] = {};
         int read_count = 0;
         Node_t *new_node = new Node_t;
+        Node_t *expression = nullptr;
+
         if ( ! sscanf (input, "%[A-Za-z]%n", letters, &read_count) )
         {
             assert (false);                       //LOOK!!!!
@@ -151,7 +172,7 @@ class CalcTree: public Tree_t <informative_value>
             if ( *input == '(')
             {
                 input++;
-                Get_E (input);
+                expression = Get_E (input);
             }
 
             if ( *input == ')' )
@@ -164,6 +185,8 @@ class CalcTree: public Tree_t <informative_value>
                 return nullptr;
             }
             new_node -> data.un_func = get_un_function_code (letters);
+            new_node -> right = expression;
+            expression -> father = new_node;
         }
         else
         {
@@ -194,7 +217,7 @@ public:
         char input [BUFSIZE] = {};
         char* pos = &input[0];
         scanf (" %[^\n]", input);
-        //УДАЛИТЬ ПРОБЕЛЫ!!!
+        delete_spaces (input);
         head = Get_G (pos);
         assert (head);
         return CTE::OK;
