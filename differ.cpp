@@ -101,19 +101,16 @@ int main ()
     
     for (int i = 0; i < times_to_differ; i++)
     {
-            fprintf (tex_stream, "The %d differentiation: \\\\", i+1);
+            fprintf (tex_stream, "\\par The %d differentiation: \\\\ ", i+1);
             differentiations[i].simplify_tree ();
             differentiations[i].tex_tree (tex_stream);
-            differentiations[i].draw ("open");
-            $p;
-            $p;
-            fprintf (tex_stream,"\\\\\\\\Let x be %lg: \\\\", variable_value);
+            fprintf (tex_stream,"\\\\ \n\n\\par Let x be %lg: \\\\ ", variable_value);
             differentiations[i].insert_variable ('x', variable_value);
             differentiations[i].tex_tree (tex_stream);
-            fprintf (tex_stream,"\\\\\\\\Calculate: \\\\");
+            fprintf (tex_stream,"\\\\ \n\n\\par Calculate: \\\\ ");
             differentiations[i].simplify_tree ();
             differentiations[i].tex_tree (tex_stream);
-            fprintf (tex_stream,"\\\\ \\\\");
+            fprintf (tex_stream,"\n \\\\ \\\\ \n");
     }
 
     char mail[BUFFERSIZE] = {};
