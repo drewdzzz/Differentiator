@@ -362,15 +362,18 @@ public:
                     }
                 }
 
-                if ( node -> data.op == '^' && node -> left -> data.un_func) 
+                if ( node -> data.op == '^' && ( node -> left -> data.un_func || node -> left -> data.op == '^') ) 
                     fprintf (stream, "( ");
 
                 tex_undertree (stream, node -> left );
 
-                if ( node -> data.op == '^' && node -> left -> data.un_func) 
+                if ( node -> data.op == '^' && ( node -> left -> data.un_func || node -> left -> data.op == '^') ) 
                     fprintf (stream, " )");
 
-                fprintf (stream, " %c ", node -> data.op);
+                if ( node -> data.op == '*')
+                    fprintf (stream, " \\cdot ");
+                else
+                    fprintf (stream, " %c ", node -> data.op);
                 if ( node -> data.op == '^') 
                     fprintf (stream, "{");
                 tex_undertree (stream, node -> right);
