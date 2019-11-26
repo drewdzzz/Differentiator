@@ -43,14 +43,15 @@ int main ()
         printf ("SYNTAX ERROR near %c\n", last_symb);
         $p;
         $p;
-        exit (13);
+        return 13;
     }
 
-    //differ.draw ("open");
+
+
 
     FILE *tex_stream = open_tex ("diff_latex.tex");
     if ( ! tex_stream  )
-        exit (226);
+        return 2;
 
 
     fprintf (tex_stream, "Your function: \n");
@@ -83,7 +84,7 @@ int main ()
                 printf ("I don't nave so much memory:(");
                 $p;
                 $p;
-                exit(1);
+                return 1;
             }
         }
         else
@@ -94,7 +95,7 @@ int main ()
                 printf ("I don't nave so much memory:(");
                 $p;
                 $p;
-                exit(1);
+                return 1;
             }
         }
     }

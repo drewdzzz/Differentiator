@@ -63,38 +63,42 @@ public:
             this -> data = other.data;
             if (other.left)
             {
-                this -> left = new Node_t;
-                *(this -> left) = *(other.left);
+                this -> left = new Node_t ( *(other.left) );
                 this -> left -> father = this;
             }
+            else this -> left = nullptr;
+            
             if (other.right)
             {
-                this -> right = new Node_t;
-                *(this -> right) = *(other.right);
+                this -> right = new Node_t ( *(other.right) );
                 this -> right -> father = this;
             } 
+            else this -> right = nullptr;         
 
         }
 
         Node_t & operator = (const Node_t &other)  //Оператор копирования (Создаёт НОВЫЕ НОДЫ рекурсивно, вроде как проверено)
         {
             this -> data = other.data;
+
             if (this -> left)
                 delete this -> left;
+
             if (this -> right)
                 delete this -> right;
+
             if (other.left)
             {
-                this -> left = new Node_t;
-                *(this -> left) = *(other.left);
+                this -> left = new Node_t ( *(other.left) );
                 this -> left -> father = this;
             }
+
             if (other.right)
             {
-                this -> right = new Node_t;
-                *(this -> right) = *(other.right);
+                this -> right = new Node_t ( *(other.right) );
                 this -> right -> father = this;
             }
+
             return *this;
         }
 
@@ -264,7 +268,7 @@ public:
         system  ("dot -Tpng Tree_dump.dot -o tree_dump.png");
     }
 
-    void dump (char* arg)
+    void dump (const char* arg)
     {
         dump ();
         if ( strcmp (arg, "open") == 0 )
