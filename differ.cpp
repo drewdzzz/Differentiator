@@ -8,6 +8,7 @@ FILE* open_tex (const char* input_file)
     FILE* stream = fopen (input_file, "w");
     fprintf (stream, "\\documentclass[a4paper, 12pt]{article}\n"
                      "\\usepackage[20pt]{extsizes}\n"
+                     "\\usepackage{amsmath}\n"
                      "\\author{Programm made by Saranchin A.N.}\n"
                      "\\title{Differentiator}\n"
                      "\\begin{document}\n"

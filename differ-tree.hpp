@@ -340,7 +340,7 @@ public:
 
             if ( node -> data.op == '/')
             {
-                fprintf (stream, "\\frac"
+                fprintf (stream, "\\cfrac"
                                  "{");
                 tex_undertree (stream, node -> left);
                 fprintf (stream, "}"
