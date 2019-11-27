@@ -34,7 +34,7 @@ char get_op_priority (char symb)
     return 0;
 }
 
-OPE::ERR use_operator (double a, double b, unsigned int op, double &res)
+OPE::ERR use_operator (double a, double b, char op, double &res)
 {
    switch (op)
    {

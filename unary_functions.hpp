@@ -5,10 +5,9 @@
 #include <string.h>
 #include <cassert>
 
-static const char* un_functions[] = {"THAT'S AN EMPTY SPACE!!!!",
-                                  "sin",
-                                  "cos",
-                                  "ln"};
+static const char* un_functions[] = {"sin",
+                                     "cos",
+                                     "ln"};
 
 bool is_this_un_func (char code, const char* func)
 {   
@@ -18,21 +17,21 @@ bool is_this_un_func (char code, const char* func)
         return false;  
 }
 
-bool is_un_function (char* potential_func)
+bool is_un_function (const char* potential_func)
 {
     if ( strlen (potential_func) == 1)
         return false;
         
-    for (char i = 1; i < sizeof (un_functions); i++)
+    for (char i = 0; i < sizeof (un_functions); i++)
         if ( ! strcmp (un_functions[i], potential_func) )
             return true;
     
     return false;
 }
 
-char get_un_function_code (char* func)
+char get_un_function_code (const char* func)
 {
-    for (char i = 1; i < sizeof (un_functions); i++)
+    for (char i = 0; i < sizeof (un_functions); i++)
     {
         if ( ! strcmp (un_functions[i], func) )
         {

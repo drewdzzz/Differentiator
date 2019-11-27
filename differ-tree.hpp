@@ -50,9 +50,10 @@ class CalcTree: public Tree_t <informative_value>
     virtual void define_for_draw (FILE* stream, Node_t *node, bool dump)
     {
         fprintf (stream, "\"tree_node%p\" [label = \"", node);
-        write_data (stream, node -> data);
+        write_data (stream, node -> node_data);
         if (dump)
-            fprintf (stream," \n Address: %p\n Left: %p \n Right: %p \n Father: %p \n Operator: %d \n UN_FUNC: %d \n priority: %d", node, node -> left, node -> right, node -> father, node -> data.op, node -> data.un_func, get_op_priority ( node -> data.op ) );
+            fprintf (stream," \n Address: %p\n Left: %p \n Right: %p \n Father: %p\n code: %d\n type: %d",
+                     node, node -> left, node -> right, node -> father, node -> node_data.data.code, node -> node_data.type );
         fprintf (stream,"\"]\n");
 
         if (node -> left)
@@ -90,7 +91,9 @@ class CalcTree: public Tree_t <informative_value>
         {
             new_node = new Node_t;
 
-            new_node -> data.op = *input;
+            new_node -> node_data.type = OPERATOR;
+            new_node -> node_data.data.code = *input;
+
             new_node -> left = node;
             node -> father = new_node;
             node = new_node;
@@ -112,7 +115,9 @@ class CalcTree: public Tree_t <informative_value>
         {
             new_node = new Node_t;
 
-            new_node -> data.op = *input;
+            new_node -> node_data.type = OPERATOR;
+            new_node -> node_data.data.code = *input;
+
             new_node -> left = node;
             node -> father = new_node;
             node = new_node;
@@ -134,7 +139,9 @@ class CalcTree: public Tree_t <informative_value>
         {
             new_node = new Node_t;
 
-            new_node -> data.op = *input;
+            new_node -> node_data.type = OPERATOR;
+            new_node -> node_data.data.code = *input;
+
             new_node -> left = node;
             node -> father = new_node;
             node = new_node;
@@ -205,13 +212,16 @@ class CalcTree: public Tree_t <informative_value>
                 assert (false);
                 return nullptr;
             }
-            new_node -> data.un_func = get_un_function_code (letters);
+
+            new_node -> node_data.type = UN_FUNCTION;
+            new_node -> node_data.data.code = get_un_function_code (letters);
             new_node -> right = expression;
             expression -> father = new_node;
         }
         else
         {
-            new_node -> data.variable = letters[0];
+            new_node -> node_data.type = VARIABLE;
+            new_node -> node_data.data.code = letters[0];
         }
         return new_node;    
     }
@@ -226,7 +236,9 @@ class CalcTree: public Tree_t <informative_value>
         }
         input += read_count;
         Node_t *new_node = new Node_t;
-        new_node -> data.value = value;
+
+        new_node -> node_data.data.code = QUANTITY;
+        new_node -> node_data.data.value = value;
         return new_node;
     }
 
@@ -247,65 +259,13 @@ public:
 
     }
 
-    void write_ex_part (FILE* stream, Node_t *node)
-    {        
-        assert (node);
-        assert (stream);
-
-        if (! node -> left && ! node -> right )
-        {
-            if (node -> data.variable)
-            {    
-                fprintf (stream, "%c", node -> data.variable);
-                return;
-            }
-            fprintf (stream, "%lg", node -> data.value );
-            return;
-        }
-
-        bool low_priority = false;
-
-        if ( node -> data.op )
-        {
-            assert (node -> right);
-            assert (node -> left);
-
-            if ( node != head )
-            {
-                assert ( node -> father );
-
-                if ( get_op_priority (node -> data.op)  <  get_op_priority (node -> father -> data.op) )
-                {
-                    low_priority = true;
-                    fprintf (stream, "( ");
-                }
-            }
-
-            write_ex_part (stream, node -> left );
-            fprintf (stream, " %c ", node -> data.op);
-            write_ex_part (stream, node -> right);
-
-            if (low_priority)
-                fprintf (stream, " )");
-        }
-
-        if ( node -> data.un_func )
-        {
-            assert (node -> right);
-
-            fprintf (stream, "%s ( ", get_un_func_by_code ( node -> data.un_func ) );
-            write_ex_part (stream, node -> right);
-            fprintf (stream, " )");
-        }
-    }
-
     void part_insert_var (Node_t *node, const char &variable, const double &var_value, long &counter)
     {
         assert (node);
-        if ( node -> data.variable == variable) 
+        if ( node -> node_data.data.code == variable && node -> node_data.type == VARIABLE ) 
         {
-            node -> data.variable = 0;
-            node -> data.value = var_value;
+            node -> node_data.type = QUANTITY;
+            node -> node_data.data.value = var_value;
         }
 
         if ( node -> left )
@@ -320,25 +280,26 @@ public:
         assert (node);
         assert (stream);
 
-        if (! node -> left && ! node -> right )
+        if (node -> node_data.type == VARIABLE)
+        {    
+            fprintf (stream, "%c", node -> node_data.data.code);
+            return;
+        }
+        if (node -> node_data.type == QUANTITY)
         {
-            if (node -> data.variable)
-            {    
-                fprintf (stream, "%c", node -> data.variable);
-                return;
-            }
-            fprintf (stream, "%lg", node -> data.value );
+            fprintf (stream, "%lg", node -> node_data.data.value );
             return;
         }
 
         bool low_priority = false;
 
-        if ( node -> data.op )
+
+        if ( node -> node_data.type == OPERATOR )
         {
             assert (node -> right);
             assert (node -> left);
 
-            if ( node -> data.op == '/')
+            if ( node -> node_data.data.code == '/')
             {
                 fprintf (stream, "\\cfrac"
                                  "{");
@@ -355,29 +316,29 @@ public:
                 {
                     assert ( node -> father );
 
-                    if ( get_op_priority (node -> data.op)  <  get_op_priority (node -> father -> data.op) )
+                    if ( get_op_priority (node -> node_data.data.code)  <  get_op_priority (node -> father  -> node_data.data.code) )
                     {
                         low_priority = true;
                         fprintf (stream, "( ");
                     }
                 }
 
-                if ( node -> data.op == '^' && ( node -> left -> data.un_func || node -> left -> data.op == '^') ) 
+                if ( node -> node_data.data.code == '^' && ( node -> left -> node_data.type == UN_FUNCTION || node -> left -> node_data.data.code == '^') ) 
                     fprintf (stream, "( ");
 
                 tex_undertree (stream, node -> left );
 
-                if ( node -> data.op == '^' && ( node -> left -> data.un_func || node -> left -> data.op == '^') ) 
+                if (node -> node_data.data.code == '^' && ( node -> left -> node_data.type == UN_FUNCTION || node -> left -> node_data.data.code == '^') ) 
                     fprintf (stream, " )");
 
-                if ( node -> data.op == '*')
+                if ( node -> node_data.data.code == '*')
                     fprintf (stream, " \\cdot ");
                 else
-                    fprintf (stream, " %c ", node -> data.op);
-                if ( node -> data.op == '^') 
+                    fprintf (stream, " %c ", node -> node_data.data.code);
+                if ( node -> node_data.data.code == '^') 
                     fprintf (stream, "{");
                 tex_undertree (stream, node -> right);
-                if ( node -> data.op == '^') 
+                if ( node -> node_data.data.code == '^') 
                     fprintf (stream, "}");
 
                 if (low_priority)
@@ -385,11 +346,11 @@ public:
             }
         }   
        
-        if ( node -> data.un_func )
+        if ( node -> node_data.type == UN_FUNCTION )
         {
             assert (node -> right);
 
-            fprintf (stream, "%s ( ", get_un_func_by_code ( node -> data.un_func ) );
+            fprintf (stream, "%s ( ", get_un_func_by_code ( node -> node_data.data.code ) );
             tex_undertree (stream, node -> right);
             fprintf (stream, " )");
         } 
@@ -419,7 +380,7 @@ public:
         if ( has_variable )
             return OPE::HAS_VARIABLE;
         if ( ! node -> left && ! node -> right )
-            result = node -> data.value;
+            result = node -> node_data.data.value;
         double a = 0;
         double b = 0;
         if (node -> left)
@@ -427,19 +388,14 @@ public:
         if (node -> right)
             calculate (node -> right, b);
 
-        if (node -> data.op)
-            use_operator ( a, b, node -> data.op, result );
+        if (node -> node_data.type == OPERATOR)
+            use_operator ( a, b, node -> node_data.data.code, result );
 
-        if (node -> data.un_func)
+        if (node -> node_data.type == UN_FUNCTION)
         {
-            result = use_un_func (node -> data.un_func, b);
+            result = use_un_func (node -> node_data.data.code, b);
         }
         return OPE::OK;
-    }
-
-    void write_example (FILE* stream) 
-    {
-        write_ex_part (stream, head);
     }
 
     void kill_children (Node_t *node)
@@ -457,22 +413,22 @@ public:
 
     static bool right_operand_is_zero (Node_t *node)
     {
-        return ( is_leaf (node -> right) &&  ( ( ! node -> right -> data.variable ) && equal (node -> right -> data.value, 0) ) );
+        return ( is_leaf (node -> right) &&  ( ( node -> right -> node_data.type == QUANTITY ) && equal (node -> right -> node_data.data.value, 0) ) );
     }
 
     static bool left_operand_is_zero (Node_t *node)
     {
-        return ( is_leaf (node -> left) &&  ( ( ! node -> left -> data.variable ) && equal (node -> left -> data.value, 0) ) );
+        return ( is_leaf (node -> left) &&  ( ( node -> left -> node_data.type == QUANTITY ) && equal (node -> left -> node_data.data.value, 0) ) );
     }
 
     static bool right_operand_is_one (Node_t *node)
     {
-        return ( is_leaf (node -> right) &&  ( ( ! node -> right -> data.variable ) && equal (node -> right -> data.value, 1) ) );
+        return ( is_leaf (node -> right) &&  ( ( node -> right -> node_data.type == QUANTITY ) && equal (node -> right -> node_data.data.value, 1) ) );
     }
 
     static bool left_operand_is_one (Node_t *node)
     {
-        return ( is_leaf (node -> left) &&  ( ( ! node -> left -> data.variable ) && equal (node -> left -> data.value, 1) ) );
+        return ( is_leaf (node -> left) &&  ( ( node -> left -> node_data.type == QUANTITY ) && equal (node -> left -> node_data.data.value, 1) ) );
     }
 
     OPE::ERR simplify_tree ()
@@ -481,20 +437,25 @@ public:
     }
 
 private:
+
+
+//Simplifying functions
+
+
     OPE::ERR simplify_unusuals (Node_t *node)
     {
-        if ( node -> data.op == '/' && right_operand_is_zero )
+        if ( (node -> node_data.type == OPERATOR)  &&  (node -> node_data.data.code == '/')  &&  (right_operand_is_zero) )
         {
            return OPE::DIVIDE_TO_ZERO;
         }
-        if ( node -> data.op == '/' && left_operand_is_zero )
+        if ( (node -> node_data.type == OPERATOR)  &&  (node -> node_data.data.code == '/')  &&  (left_operand_is_zero) )
         {
             kill_children (node);
-            node -> data.value = 0;
-            node -> data.op = 0;
+            node -> node_data.data.value = 0.0;
+            node -> node_data.type = QUANTITY;
             return OPE::OK;
         }
-        if ( node -> data.op == '+')
+        if ( node -> node_data.type == OPERATOR && node -> node_data.data.code == '+')
         { 
             if ( left_operand_is_zero (node) )
             {
@@ -534,13 +495,13 @@ private:
                 return OPE::OK;      
             }
         }
-        if ( node -> data.op == '*' )
+        if ( node -> node_data.type == OPERATOR && node -> node_data.data.code == '*' )
         {
             if (right_operand_is_zero (node) || left_operand_is_zero (node) )
             {
                 kill_children (node);
-                node -> data.op    = 0;
-                node -> data.value = 0;
+                node -> node_data.type = QUANTITY;
+                node -> node_data.data.value = 0.0;
                 return OPE::OK;
             }
             if (left_operand_is_one (node) )
@@ -584,12 +545,14 @@ private:
         
     }
 
+
+
     OPE::ERR simplify (Node_t *node)
     {
-        if (! node -> left && ! node -> right)
+        if ( node -> node_data.type == QUANTITY || node -> node_data.type == VARIABLE )
             return OPE::OK;
 
-        if ( node -> data.op )
+        if ( node -> node_data.type == OPERATOR )
         {
             assert (node -> left);
             assert (node -> right);
@@ -597,10 +560,10 @@ private:
             simplify (node -> left);
             simplify (node -> right);
 
-            if ( is_leaf (node -> left) && is_leaf (node -> right) && ! node -> left -> data.variable && ! node -> right -> data.variable )
+            if ( node -> left -> node_data.type == QUANTITY  &&  node -> right -> node_data.type == QUANTITY )
             {
-                use_operator ( node -> left -> data.value, node -> right -> data.value, node -> data.op, node -> data.value);
-                node -> data.op = 0;
+                use_operator ( node -> left -> node_data.data.value, node -> right -> node_data.data.value, node -> node_data.data.code, node -> node_data.data.value);
+                node -> node_data.type = QUANTITY;
                 kill_children (node);
                 return OPE::OK;
             }
@@ -611,23 +574,19 @@ private:
                 return OPE::OK;
             }
         }
-        else if ( node -> data.un_func )
+        else if ( node -> node_data.type == UN_FUNCTION )
         {
             assert (node -> right);
 
             simplify (node -> right);
 
-            if ( is_leaf (node -> right) && ! node -> right -> data.variable )
+            if ( node -> right -> node_data.type == QUANTITY )
             {
-                node -> data.value = use_un_func ( node -> data.un_func, node -> right -> data.value);
-                node -> data.un_func = 0;
+                node -> node_data.type = QUANTITY;
+                node -> node_data.data.code = use_un_func ( node -> node_data.data.code, node -> right -> node_data.data.value);
                 kill_children (node);
-                return OPE::OK;
             }
-            else
-            {
-                return OPE::OK;
-            } 
+            return OPE::OK;
         }
 
     }
