@@ -249,6 +249,7 @@ struct diff_funcs
         else if ( is_this_un_func (node -> node_data.data.code, "cos") )
         {
 
+            new_node -> node_data.type = OPERATOR;
             new_node -> node_data.data.code = '*';
 
             new_node -> left = new CalcTree::Node_t;
