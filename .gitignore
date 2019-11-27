@@ -43,3 +43,6 @@ cmake-build-debug/CMakeFiles/TargetDirectories.txt
 cmake-build-debug/differ.cbp
 cmake-build-debug/Makefile
 CMakeLists.txt
+.idea/differ.iml
+.idea/modules.xml
+.idea/vcs.xml
