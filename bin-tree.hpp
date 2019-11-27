@@ -9,19 +9,28 @@
 #include "unary_functions.hpp"
 #define $p getchar()
 
+enum node_type
+{
+    QUANTITY,
+    VARIABLE,
+    OPERATOR,
+    UN_FUNCTION
+};
+
 struct informative_value
 {
-    double value;
-    char op;
-    char variable;
-    char un_func;
+    union
+    {
+        double value;
+        char code;
+    }data;
+    
+    char type;
 
     informative_value & operator = (const informative_value &other)
     {
-        this -> value    = other.value;
-        this -> op       = other.op;
-        this -> variable = other.variable;
-        this -> un_func  = other.un_func;
+        this -> data = other.data;
+        this -> type  = other.type;
         return *this;
     }
 };
@@ -45,7 +54,7 @@ public:
     ///@brief Node struct
     struct Node_t
     {
-        T data;
+        T node_data;
         Node_t *right;
         Node_t *left;
         Node_t *father;
@@ -54,13 +63,13 @@ public:
             right (nullptr),
             left (nullptr),
             father (nullptr),
-            data ({})
+            node_data ({})
         {};
         
         Node_t (const Node_t &other):
-             data ({})                             //Конструктор копирования (СОЗДАЁТ НОВЫЕ НОДЫ РЕКУРСИВНО, А НЕ ПРОСТО ПРИСВАИВАЕТ АДРЕСА!!!! УЖЕ ПРОВЕРЕНО)
+             node_data ({})                             //Конструктор копирования (СОЗДАЁТ НОВЫЕ НОДЫ РЕКУРСИВНО, А НЕ ПРОСТО ПРИСВАИВАЕТ АДРЕСА!!!! УЖЕ ПРОВЕРЕНО)
         {
-            this -> data = other.data;
+            this -> node_data = other.node_data;
             if (other.left)
             {
                 this -> left = new Node_t ( *(other.left) );
@@ -79,7 +88,7 @@ public:
 
         Node_t & operator = (const Node_t &other)  //Оператор копирования (Создаёт НОВЫЕ НОДЫ рекурсивно, вроде как проверено)
         {
-            this -> data = other.data;
+            this -> node_data = other.node_data;
 
             if (this -> left)
                 delete this -> left;
@@ -134,7 +143,7 @@ public:
     ERR_CODE set_data (Node_t *node, T data)
     {
         if (!node) return NOT_EXIST;
-        node -> data = data;
+        node -> node_data = data;
         return OK;
     }
 
@@ -146,7 +155,7 @@ public:
         if (node -> right) return IS_NOT_FREE;
 
         node -> right = new Node_t;
-        node -> right -> data = data;
+        node -> right -> node_data = data;
         node -> right -> father = node;
         return OK;
     }
@@ -171,7 +180,7 @@ public:
         if (node -> left) return IS_NOT_FREE;
 
         node -> left = new Node_t;
-        node -> left -> data = data;
+        node -> left -> node_data = data;
         node -> left -> father = node;
         return OK;
     }
@@ -202,7 +211,7 @@ public:
     virtual void define_for_draw (FILE* stream, Node_t *node, bool dump)
     {
         fprintf (stream, "\"tree_node%p\" [label = \"", node);
-        write_data (stream, node -> data);
+        write_data (stream, node -> node_data);
         if (dump)
             fprintf (stream," \n Addres: %p\n Left: %p \n Right: %p\n Father: %p", node, node -> left, node -> right, node -> father);
         fprintf (stream,"\"]\n");
@@ -340,24 +349,25 @@ protected:
         fprintf (stream, "%lf", value);
     }
 
-    void write_data (FILE* stream, informative_value &data)
+    void write_data (FILE* stream, informative_value &value)
     {
-        if ( data.op ) 
+        switch (value.type)
         {
-            fprintf (stream, "%c", data.op );
-        }
-        else if (data.un_func)
-        {   
-            char* un_func = (char*)get_un_func_by_code (data.un_func);
-            fprintf (stream, "%s", un_func);
-        }
-        else if (data.variable)
-        {
-            fprintf (stream, "%c", data.variable);
-        }
-        else
-        {
-            fprintf (stream, "%lg", data.value);
+            case OPERATOR:
+                fprintf (stream, "%c", value.data.code );
+                break;
+            
+            case UN_FUNCTION:
+                fprintf (stream, "%s", get_un_func_by_code (value.data.code));
+                break;
+
+            case VARIABLE:
+                fprintf (stream, "%c", value.data.code );
+                break;
+
+            case QUANTITY:
+                fprintf (stream, "%lg", value.data.value);
+                break;
         }
     }
 };
