@@ -78,14 +78,14 @@ public:
             node_data ({})
         {};
 
-        Node_t (double value):                                  //Конструктор
+        Node_t (double value):                                
             right (nullptr),
             left (nullptr),
             father (nullptr),
             node_data (value)
         {};
         
-        Node_t (const Node_t &other)                          //Конструктор копирования (СОЗДАЁТ НОВЫЕ НОДЫ РЕКУРСИВНО, А НЕ ПРОСТО ПРИСВАИВАЕТ АДРЕСА!!!! УЖЕ ПРОВЕРЕНО)
+        Node_t (const Node_t &other)                          
         {
             this -> node_data = other.node_data;
             if (other.left)
@@ -104,7 +104,8 @@ public:
 
         }
 
-        
+
+
 
         Node_t * operator + (Node_t &other)
         {
@@ -166,7 +167,9 @@ public:
             return new_node;
         }
 
-        Node_t & operator = (const Node_t &other)  //Оператор копирования (Создаёт НОВЫЕ НОДЫ рекурсивно, вроде как проверено)
+
+
+        Node_t & operator = (const Node_t &other)  
         {
             this -> node_data = other.node_data;
 
@@ -190,6 +193,10 @@ public:
 
             return *this;
         }
+
+
+
+
 
     } *head;
 

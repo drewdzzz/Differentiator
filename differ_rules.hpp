@@ -102,11 +102,10 @@ private:
             case '^':
             {
                 CalcTree::Node_t *left_part = new CalcTree::Node_t; 
-
                 CalcTree::Node_t *log = make_un_function ("ln", node -> left);
-
                 left_part = ( * new CalcTree::Node_t ( *(node -> right) ) ) * ( * log ); 
                 CalcTree::Node_t *new_node = ( * differentiate (left_part, diff_var, err_code) ) * ( * new CalcTree::Node_t ( *node ) );
+
                 CalcTree::free_tree (left_part);
                 return new_node;
             }
