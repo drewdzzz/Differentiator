@@ -33,6 +33,18 @@ struct informative_value
         this -> type  = other.type;
         return *this;
     }
+
+    informative_value ():
+        data ({}),
+        type (0)
+    {};
+    informative_value (double value):
+        data ({}),
+        type (0)
+    {
+        data.value = value;
+        type = QUANTITY;
+    };
 };
 
 ///@brief Enum with error codes for using my binary tree
@@ -65,9 +77,15 @@ public:
             father (nullptr),
             node_data ({})
         {};
+
+        Node_t (double value):                                  //Конструктор
+            right (nullptr),
+            left (nullptr),
+            father (nullptr),
+            node_data (value)
+        {};
         
-        Node_t (const Node_t &other):
-             node_data ({})                             //Конструктор копирования (СОЗДАЁТ НОВЫЕ НОДЫ РЕКУРСИВНО, А НЕ ПРОСТО ПРИСВАИВАЕТ АДРЕСА!!!! УЖЕ ПРОВЕРЕНО)
+        Node_t (const Node_t &other)                          //Конструктор копирования (СОЗДАЁТ НОВЫЕ НОДЫ РЕКУРСИВНО, А НЕ ПРОСТО ПРИСВАИВАЕТ АДРЕСА!!!! УЖЕ ПРОВЕРЕНО)
         {
             this -> node_data = other.node_data;
             if (other.left)
@@ -84,6 +102,68 @@ public:
             } 
             else this -> right = nullptr;         
 
+        }
+
+        
+
+        Node_t * operator + (Node_t &other)
+        {
+            Node_t* new_node = new Node_t;
+            new_node -> node_data.type = OPERATOR;
+            new_node -> node_data.data.code = '+';
+            new_node -> left = this;
+                new_node -> left -> father = new_node;
+            new_node -> right = &other;
+                new_node -> right -> father = new_node;
+            return new_node;
+        }
+
+        Node_t * operator - (Node_t &other)
+        {
+            Node_t* new_node = new Node_t;
+            new_node -> node_data.type = OPERATOR;
+            new_node -> node_data.data.code = '-';
+            new_node -> left = this;
+                new_node -> left -> father = new_node;
+            new_node -> right = &other;
+                new_node -> right -> father = new_node;
+            return new_node;
+        }
+
+        Node_t * operator * (Node_t &other)
+        {
+            Node_t* new_node = new Node_t;
+            new_node -> node_data.type = OPERATOR;
+            new_node -> node_data.data.code = '*';
+            new_node -> left = this;
+                new_node -> left -> father = new_node;
+            new_node -> right = &other;
+                new_node -> right -> father = new_node;
+            return new_node;
+        }
+
+        Node_t * operator / (Node_t &other)
+        {
+            Node_t* new_node = new Node_t;
+            new_node -> node_data.type = OPERATOR;
+            new_node -> node_data.data.code = '/';
+            new_node -> left = this;
+                new_node -> left -> father = new_node;
+            new_node -> right = &other;
+                new_node -> right -> father = new_node;
+            return new_node;
+        }
+
+        Node_t * operator ^ (Node_t &other)
+        {
+            Node_t* new_node = new Node_t;
+            new_node -> node_data.type = OPERATOR;
+            new_node -> node_data.data.code = '^';
+            new_node -> left = this;
+                new_node -> left -> father = new_node;
+            new_node -> right = &other;
+                new_node -> right -> father = new_node;
+            return new_node;
         }
 
         Node_t & operator = (const Node_t &other)  //Оператор копирования (Создаёт НОВЫЕ НОДЫ рекурсивно, вроде как проверено)

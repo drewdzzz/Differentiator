@@ -319,17 +319,17 @@ public:
                     if ( get_op_priority (node -> node_data.data.code)  <  get_op_priority (node -> father  -> node_data.data.code) )
                     {
                         low_priority = true;
-                        fprintf (stream, "( ");
+                        fprintf (stream, "\\left( ");
                     }
                 }
 
                 if ( node -> node_data.data.code == '^' && ( node -> left -> node_data.type == UN_FUNCTION || node -> left -> node_data.data.code == '^') ) 
-                    fprintf (stream, "( ");
+                    fprintf (stream, "\\left( ");
 
                 tex_undertree (stream, node -> left );
 
                 if (node -> node_data.data.code == '^' && ( node -> left -> node_data.type == UN_FUNCTION || node -> left -> node_data.data.code == '^') ) 
-                    fprintf (stream, " )");
+                    fprintf (stream, " \\right)");
 
                 if ( node -> node_data.data.code == '*')
                     fprintf (stream, " \\cdot ");
@@ -342,7 +342,7 @@ public:
                     fprintf (stream, "}");
 
                 if (low_priority)
-                    fprintf (stream, " )");
+                    fprintf (stream, " \\right)");
             }
         }   
        
@@ -350,9 +350,9 @@ public:
         {
             assert (node -> right);
 
-            fprintf (stream, "%s ( ", get_un_func_by_code ( node -> node_data.data.code ) );
+            fprintf (stream, "%s \\left( ", get_un_func_by_code ( node -> node_data.data.code ) );
             tex_undertree (stream, node -> right);
-            fprintf (stream, " )");
+            fprintf (stream, " \\right)");
         } 
     }
 

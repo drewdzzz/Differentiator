@@ -30,7 +30,6 @@ void close_and_make_tex (FILE* stream)
     fclose (stream);
     system ("pdflatex diff_latex.tex");
     system ("clear");
-    system ("xdg-open diff_latex.pdf");
 }
 
 int main ()
