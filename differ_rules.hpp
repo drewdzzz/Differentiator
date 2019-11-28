@@ -101,37 +101,19 @@ struct diff_funcs
 
             case '^':
             {
-                CalcTree::Node_t *new_node = new CalcTree::Node_t;
-                new_node -> node_data.type = OPERATOR;
-                new_node -> node_data.data.code = '*';
-                new_node -> right = new CalcTree::Node_t ( *node );
-                    father_to_son ( new_node,   new_node -> right );
-
                 CalcTree::Node_t *left_part = new CalcTree::Node_t; 
-                assert (left_part); 
 
-                left_part -> node_data.type = OPERATOR;
-                left_part -> node_data.data.code = '*';
-                
-                left_part -> left = new CalcTree::Node_t ( *(node -> right) ); 
-                    father_to_son ( left_part,   left_part -> left );
+                CalcTree::Node_t *log = new CalcTree::Node_t;
+                    log -> node_data.type = UN_FUNCTION;
+                    log -> node_data.data.code = get_un_function_code ( "ln" );     
 
-                left_part -> right = new CalcTree::Node_t;
-                    left_part -> right -> node_data.type = UN_FUNCTION;
-                    left_part -> right -> node_data.data.code = get_un_function_code ( "ln" );     
-                    father_to_son ( left_part,   left_part -> right );
+                    log -> right = new CalcTree::Node_t ( *(node -> left) );
+                    father_to_son ( log,   log -> right );
 
-                left_part -> right -> right = new CalcTree::Node_t ( *(node -> left) );
-                    father_to_son ( left_part -> right,   left_part -> right -> right );
-
-                new_node -> left = differentiate (left_part, diff_var, err_code);
-                    father_to_son ( new_node,   new_node -> left );
-
+                left_part = ( * new CalcTree::Node_t ( *(node -> right) ) ) * ( * log ); 
+                CalcTree::Node_t *new_node = ( * differentiate (left_part, diff_var, err_code) ) * ( * new CalcTree::Node_t ( *node ) );
                 CalcTree::free_tree (left_part);
-
                 return new_node;
-
-                break;
             }
             default: 
                 err_code = DFE::UNKNOWN_OP; 
