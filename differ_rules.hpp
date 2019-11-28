@@ -21,9 +21,9 @@ inline void father_to_son (CalcTree::Node_t *father, CalcTree::Node_t *son)
     son -> father = father;
 }
 
-struct diff_funcs 
+class diff_funcs 
 {
-
+public:
     static CalcTree::Node_t* differentiate (CalcTree::Node_t *node, const char &diff_var, DFE::ERR &err_code)
     {
 
@@ -68,6 +68,8 @@ struct diff_funcs
 
     }
 
+private:
+
     static CalcTree::Node_t* operator_diff (CalcTree::Node_t *node, const char &diff_var, DFE::ERR &err_code)
     {
         switch (node -> node_data.data.code)
@@ -80,7 +82,6 @@ struct diff_funcs
 
             case '*':
             {
-
                 CalcTree::Node_t * left_node  = ( * differentiate (node -> left, diff_var, err_code) ) * ( * new CalcTree::Node_t ( * (node -> right) ) );
                 CalcTree::Node_t * right_node = ( * differentiate (node -> right, diff_var, err_code) ) * ( * new CalcTree::Node_t ( * (node -> left) ) );
 
@@ -89,7 +90,6 @@ struct diff_funcs
 
             case '/':
             {
-
                 CalcTree::Node_t *left_left  = ( * new CalcTree::Node_t ( *(node -> right) ) ) *  ( * differentiate (node -> left, diff_var,  err_code) );
                 CalcTree::Node_t *left_right = ( * new CalcTree::Node_t ( *(node -> left) ) )  *  ( * differentiate (node -> right, diff_var, err_code) );
                 CalcTree::Node_t *left       = ( * left_left ) - ( * left_right );
@@ -103,12 +103,7 @@ struct diff_funcs
             {
                 CalcTree::Node_t *left_part = new CalcTree::Node_t; 
 
-                CalcTree::Node_t *log = new CalcTree::Node_t;
-                    log -> node_data.type = UN_FUNCTION;
-                    log -> node_data.data.code = get_un_function_code ( "ln" );     
-
-                    log -> right = new CalcTree::Node_t ( *(node -> left) );
-                    father_to_son ( log,   log -> right );
+                CalcTree::Node_t *log = make_un_function ("ln", node -> left);
 
                 left_part = ( * new CalcTree::Node_t ( *(node -> right) ) ) * ( * log ); 
                 CalcTree::Node_t *new_node = ( * differentiate (left_part, diff_var, err_code) ) * ( * new CalcTree::Node_t ( *node ) );
@@ -124,73 +119,42 @@ struct diff_funcs
 
     static CalcTree::Node_t* unary_function_diff (CalcTree::Node_t *node, const char &diff_var, DFE::ERR &err_code)
     {
-        CalcTree::Node_t *new_node = new CalcTree::Node_t;
 
         if ( is_this_un_func (node -> node_data.data.code, "ln") )
         {
-            new_node -> node_data.type = OPERATOR;
-            new_node -> node_data.data.code = '/';
-
-            new_node -> left  = differentiate (node -> right, diff_var, err_code);
-                father_to_son (new_node,   new_node -> left);
-
-            new_node -> right = new CalcTree::Node_t ( *(node -> right) ); 
-                father_to_son (new_node,   new_node -> right);
+            return ( * differentiate (node -> right, diff_var, err_code) ) / ( * new CalcTree::Node_t ( *(node -> right) ) );
         }
         else if ( is_this_un_func (node -> node_data.data.code, "sin") )
         {
+            CalcTree::Node_t *cos = make_un_function ("cos", node -> right);
 
-            new_node -> node_data.type = OPERATOR;
-            new_node -> node_data.data.code = '*';
-
-            new_node -> left = new CalcTree::Node_t;
-                new_node -> left -> node_data.type = UN_FUNCTION;
-                new_node -> left -> node_data.data.code = get_un_function_code ( "cos" );
-                father_to_son ( new_node,   new_node -> left);
-
-            new_node -> left -> right = new CalcTree::Node_t ( *(node -> right) );
-                father_to_son ( new_node -> left,   new_node -> left -> right );
-
-            new_node -> right = differentiate (node -> right, diff_var, err_code);
-                father_to_son ( new_node,   new_node -> right );
-
+            return ( * cos ) * ( * differentiate (node -> right, diff_var, err_code) );
         }
         else if ( is_this_un_func (node -> node_data.data.code, "cos") )
         {
+            CalcTree::Node_t *left_part =  ( * new CalcTree::Node_t (-1.0) ) * ( * make_un_function ("sin", (node -> right) ) );
 
-            new_node -> node_data.type = OPERATOR;
-            new_node -> node_data.data.code = '*';
-
-            new_node -> left = new CalcTree::Node_t;
-                new_node -> left -> node_data.type = OPERATOR;
-                new_node -> left -> node_data.data.code = '*';
-                father_to_son ( new_node,   new_node -> left );
-
-            new_node -> left -> left = new CalcTree::Node_t;
-                new_node -> left -> left -> node_data.type = QUANTITY;
-                new_node -> left -> left -> node_data.data.value = -1;
-                father_to_son ( new_node -> left,   new_node -> left -> left );
-
-            new_node -> left -> right = new CalcTree::Node_t;
-                new_node -> left -> right -> node_data.type = UN_FUNCTION;
-                new_node -> left -> right -> node_data.data.code = get_un_function_code ( "sin" );
-                father_to_son ( new_node -> left,   new_node -> left -> right );
-            
-            new_node -> left -> right -> right = new CalcTree::Node_t ( *(node -> right) );
-                father_to_son ( new_node -> left -> right,   new_node -> left -> right -> right );
-
-            new_node -> right = differentiate ( node -> right, diff_var, err_code );
-                father_to_son ( new_node,   new_node -> right );
-
+            return ( * left_part ) * ( * differentiate ( node -> right, diff_var, err_code ) );
         }
         else
         {
             err_code = DFE::UNKNOWN_UN_FUNC;
-            delete new_node;
-            new_node = nullptr;
+            return nullptr;
         }       
 
-        return new_node;
+        assert (false);
+    }
+
+    static CalcTree::Node_t* make_un_function (const char* function, const CalcTree::Node_t* argument)
+    {
+        assert ( is_un_function (function) );
+        CalcTree::Node_t *func = new CalcTree::Node_t;
+        func -> node_data.type = UN_FUNCTION;
+        func -> node_data.data.code = get_un_function_code ( function );
+
+        func -> right = new CalcTree::Node_t ( *argument );
+        father_to_son ( func,   func -> right );
+        return func;
     }
 
 };
