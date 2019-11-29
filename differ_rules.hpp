@@ -101,13 +101,21 @@ private:
 
             case '^':
             {
-                CalcTree::Node_t *left_part = new CalcTree::Node_t; 
-                CalcTree::Node_t *log = make_un_function ("ln", node -> left);
-                left_part = ( * new CalcTree::Node_t ( *(node -> right) ) ) * ( * log ); 
-                CalcTree::Node_t *new_node = ( * differentiate (left_part, diff_var, err_code) ) * ( * new CalcTree::Node_t ( *node ) );
+                if ( node -> right -> node_data.type == QUANTITY)
+                {
+                    CalcTree::Node_t *right_part = ( * new CalcTree::Node_t ( * node -> left ) ) ^ ( * new CalcTree::Node_t ( node -> right -> node_data.data.value - 1.0 ) );
+                    CalcTree::Node_t *first_diff = ( * new CalcTree::Node_t ( * node -> right) ) * ( * right_part );
+                    return ( * differentiate (node -> left, diff_var, err_code) ) * ( * first_diff );
+                }
+                else
+                {
+                    CalcTree::Node_t *log = make_un_function ("ln", node -> left);
+                    CalcTree::Node_t *left_part = ( * new CalcTree::Node_t ( *(node -> right) ) ) * ( * log ); 
+                    CalcTree::Node_t *new_node = ( * differentiate (left_part, diff_var, err_code) ) * ( * new CalcTree::Node_t ( *node ) );
 
-                CalcTree::free_tree (left_part);
-                return new_node;
+                    CalcTree::free_tree (left_part);
+                    return new_node;
+                }
             }
             default: 
                 err_code = DFE::UNKNOWN_OP; 
