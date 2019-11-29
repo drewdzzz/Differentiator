@@ -53,11 +53,11 @@ char* get_un_func_by_code (char code)
 double use_un_func (char func_code, double value)
 {
 
-    if (is_this_un_func (func_code, "sin") )
+    if ( is_this_un_func (func_code, "sin") )
         return sin (value);
-    if (is_this_un_func (func_code, "cos") )
+    if ( is_this_un_func (func_code, "cos") )
         return cos (value);
-    if (is_this_un_func (func_code, "ln") )
+    if ( is_this_un_func (func_code, "ln") )
         return log (value);
 
     assert (false);

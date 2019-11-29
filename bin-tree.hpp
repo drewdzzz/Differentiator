@@ -38,6 +38,7 @@ struct informative_value
         data ({}),
         type (0)
     {};
+    
     informative_value (double value):
         data ({}),
         type (0)

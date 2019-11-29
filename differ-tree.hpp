@@ -242,6 +242,8 @@ class CalcTree: public Tree_t <informative_value>
         return new_node;
     }
 
+
+
 public: 
     char read_tree ()
     {  
@@ -379,10 +381,11 @@ public:
     {
         if ( has_variable )
             return OPE::HAS_VARIABLE;
-        if ( ! node -> left && ! node -> right )
+        if ( node -> node_data.type == QUANTITY )
             result = node -> node_data.data.value;
         double a = 0;
         double b = 0;
+
         if (node -> left)
             calculate (node -> left, a);
         if (node -> right)
@@ -495,6 +498,27 @@ private:
                 return OPE::OK;      
             }
         }
+        if ( node -> node_data.type == OPERATOR && node -> node_data.data.code == '-')
+        {
+            if ( right_operand_is_zero (node) )
+            {
+                if (! node -> father)
+                {
+                    head = node -> left;
+                }
+                else if (node -> father -> left == node)
+                {
+                    node -> father -> left = node -> left; //Подвешиваем то, что слева, к левой ветке
+                } 
+                else
+                {
+                    node -> father -> right = node -> left; //Подвешиваем то, что слева, к правой ветке
+                }
+                delete node -> right;
+                delete node; 
+                return OPE::OK;      
+            }
+        }   
         if ( node -> node_data.type == OPERATOR && node -> node_data.data.code == '*' )
         {
             if (right_operand_is_zero (node) || left_operand_is_zero (node) )
@@ -569,13 +593,14 @@ private:
             }
             else 
             {   
-                if ( simplify_unusuals (node) != OPE::OK )
+                if ( simplify_unusuals (node) == OPE::DIVIDE_TO_ZERO )
                     return OPE::DIVIDE_TO_ZERO;
                 return OPE::OK;
             }
         }
         else if ( node -> node_data.type == UN_FUNCTION )
         {
+
             assert (node -> right);
 
             simplify (node -> right);
@@ -583,7 +608,7 @@ private:
             if ( node -> right -> node_data.type == QUANTITY )
             {
                 node -> node_data.type = QUANTITY;
-                node -> node_data.data.code = use_un_func ( node -> node_data.data.code, node -> right -> node_data.data.value);
+                node -> node_data.data.value = use_un_func ( node -> node_data.data.code, node -> right -> node_data.data.value);
                 kill_children (node);
             }
             return OPE::OK;

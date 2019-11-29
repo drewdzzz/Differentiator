@@ -46,9 +46,6 @@ int main ()
         return 13;
     }
 
-
-
-
     FILE *tex_stream = open_tex ("diff_latex.tex");
     if ( ! tex_stream  )
         return 2;
@@ -81,7 +78,7 @@ int main ()
             differentiations[i].head = diff_funcs::differentiate (differ.head, 'x', err_code);
             if (err_code != DFE::OK)
             {
-                printf ("I don't nave so much memory:(");
+                printf ("Cannot do this:(");
                 $p;
                 $p;
                 return 1;
@@ -92,7 +89,7 @@ int main ()
             differentiations[i].head = diff_funcs::differentiate (differentiations[i-1].head, 'x', err_code);
             if (err_code != DFE::OK)
             {
-                printf ("I don't nave so much memory:(");
+                printf ("Cannot do this:(");
                 $p;
                 $p;
                 return 1;
